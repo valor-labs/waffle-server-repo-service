@@ -6,8 +6,11 @@
   "scripts": {
     "build": "npm run tsc",
     "test": "npm run spec",
-    "spec": "mocha --reporter mochawesome --reporter-options reportDir=specReports,reportFilename=specReport --timeout 20000 --compilers ts:ts-node/register 'test/**/*.spec.ts'",
-    "spec:coverage": "rm -rf specReports && istanbul --include-all-sources cover _mocha -- -R spec --timeout 20000 --compilers ts:ts-node/register 'test/**/*.spec.ts' && remap-istanbul -i coverage/coverage.json -e node_modules,coverage,'ws.import/repos' -t html -o coverage/remap-istanbul",
+    "spec": "mocha --reporter mochawesome --reporter-options reportDir=specReports,reportFilename=specReport --compilers ts:ts-node/register 'test/**/*.spec.ts'",
+    "spec:coverage": "npm run spec:rm && npm run spec:istanbul && npm run spec:remap",
+    "spec:rm": "rm -rf specReports",
+    "spec:istanbul": "istanbul --include-all-sources cover _mocha -- -R spec --compilers ts:ts-node/register 'test/**/*.spec.ts'",
+    "spec:remap": "remap-istanbul -i coverage/coverage.json -e node_modules,coverage -t html -o coverage/remap-istanbul",
     "tsc": "tsc --project tsconfig.json"
   },
   "repository": {
@@ -34,5 +37,31 @@
   "bugs": {
     "url": "https://github.com/Gapminder/waffle-server-repo-service/issues"
   },
-  "homepage": "https://github.com/Gapminder/waffle-server-repo-service#readme"
+  "homepage": "https://github.com/Gapminder/waffle-server-repo-service#readme",
+  "dependencies": {
+    "@types/async": "^2.0.40",
+    "@types/lodash": "^4.14.66",
+    "async": "^2.4.1",
+    "lodash": "^4.17.4",
+    "path": "^0.12.7",
+    "typescript": "^2.3.4"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.0.0",
+    "@types/mocha": "^2.2.41",
+    "@types/node": "^7.0.29",
+    "@types/sinon": "^2.3.1",
+    "@types/sinon-test": "^1.0.2",
+    "bunyan": "^1.8.10",
+    "chai": "^4.0.2",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.4.2",
+    "mochawesome": "^2.2.1",
+    "remap-istanbul": "^0.9.5",
+    "shelljs": "^0.7.8",
+    "sinon": "^2.3.4",
+    "sinon-test": "^1.0.2",
+    "ts-node": "^3.0.6",
+    "tslint": "^5.4.3"
+  }
 }
