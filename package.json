@@ -1,0 +1,38 @@
+{
+  "name": "waffle-server-repo-service",
+  "version": "1.0.0",
+  "description": "Module for working with git repos on WS and CLI tool",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run tsc",
+    "test": "npm run spec",
+    "spec": "mocha --reporter mochawesome --reporter-options reportDir=specReports,reportFilename=specReport --timeout 20000 --compilers ts:ts-node/register 'test/**/*.spec.ts'",
+    "spec:coverage": "rm -rf specReports && istanbul --include-all-sources cover _mocha -- -R spec --timeout 20000 --compilers ts:ts-node/register 'test/**/*.spec.ts' && remap-istanbul -i coverage/coverage.json -e node_modules,coverage,'ws.import/repos' -t html -o coverage/remap-istanbul",
+    "tsc": "tsc --project tsconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Gapminder/waffle-server-repo-service.git"
+  },
+  "keywords": [
+    "git",
+    "repositories",
+    "service",
+    "shell",
+    "shelljs",
+    "command",
+    "WS"
+  ],
+  "author": "Valor Software",
+  "license": "GPL-3.0",
+  "contributors": [
+    {
+      "name": "Oleksandra Kalinina",
+      "email": "alexandra.kalinina@valor-software.com"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/Gapminder/waffle-server-repo-service/issues"
+  },
+  "homepage": "https://github.com/Gapminder/waffle-server-repo-service#readme"
+}
