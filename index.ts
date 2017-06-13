@@ -1,6 +1,6 @@
 import { createLogger, Logger } from 'bunyan';
 import { ChildProcess } from 'child_process';
-import { defaults, includes } from 'lodash';
+import { defaults, includes, pick } from 'lodash';
 import * as shell from 'shelljs';
 
 export interface Options {
@@ -11,6 +11,11 @@ export interface Options {
   async?: Boolean;
   branch?: string;
   commit?: string;
+}
+
+export interface ShellOptions {
+  silent?: Boolean;
+  async?: Boolean;
 }
 
 export const defaultOptions: any = {
@@ -54,54 +59,61 @@ class ReposService {
 
   public clone(options: Options, callback: ErrorCallback<string>): ChildProcess {
     const { gitRepo, githubUrl, pathToRepo, branch } = defaults(options, defaultOptions);
+    const shellOptions = pick(options, ['silent', 'async']);
     const command = `git -C ${gitRepo} clone ${githubUrl} ${pathToRepo} -b ${branch}`;
 
-    return this.runShellJsCommand(command, options, callback);
+    return this.runShellJsCommand(command, shellOptions, callback);
   }
 
   public checkoutToBranch(options: Options, callback: ErrorCallback<string>): ChildProcess {
     const { gitRepo, branch } = defaults(options, defaultOptions);
+    const shellOptions = pick(options, ['silent', 'async']);
     const command = `${this.getAbsolutePathToRepo(gitRepo)} checkout ${branch}`;
 
-    return this.runShellJsCommand(command, options, callback);
+    return this.runShellJsCommand(command, shellOptions, callback);
   }
 
   public checkoutToCommit(options: Options, callback: ErrorCallback<string>): ChildProcess {
     const { gitRepo, commit } = defaults(options, defaultOptions);
+    const shellOptions = pick(options, ['silent', 'async']);
     const command = `${this.getAbsolutePathToRepo(gitRepo)} checkout ${commit}`;
 
-    return this.runShellJsCommand(command, options, callback);
+    return this.runShellJsCommand(command, shellOptions, callback);
   }
 
   public fetch(options: Options, callback: ErrorCallback<string>): ChildProcess {
     const { gitRepo } = defaults(options, defaultOptions);
+    const shellOptions = pick(options, ['silent', 'async']);
     const command = `${this.getAbsolutePathToRepo(gitRepo)} fetch --all --prune`;
 
-    return this.runShellJsCommand(command, options, callback);
+    return this.runShellJsCommand(command, shellOptions, callback);
   }
 
   public reset(options: Options, callback: ErrorCallback<string>): ChildProcess {
     const { gitRepo, branch } = defaults(options, defaultOptions);
+    const shellOptions = pick(options, ['silent', 'async']);
     const command = `${this.getAbsolutePathToRepo(gitRepo)} reset --hard origin/${branch}`;
 
-    return this.runShellJsCommand(command, options, callback);
+    return this.runShellJsCommand(command, shellOptions, callback);
   }
 
   public pull(options: Options, callback: ErrorCallback<string>): ChildProcess {
     const { gitRepo, branch } = defaults(options, defaultOptions);
+    const shellOptions = pick(options, ['silent', 'async']);
     const command = `${this.getAbsolutePathToRepo(gitRepo)} pull origin ${branch}`;
 
-    return this.runShellJsCommand(command, options, callback);
+    return this.runShellJsCommand(command, shellOptions, callback);
   }
 
   public clean(options: Options, callback: ErrorCallback<string>): ChildProcess {
     const { gitRepo } = defaults(options, defaultOptions);
+    const shellOptions = pick(options, ['silent', 'async']);
     const command = `${this.getAbsolutePathToRepo(gitRepo)} clean -f -d`;
 
-    return this.runShellJsCommand(command, options, callback);
+    return this.runShellJsCommand(command, shellOptions, callback);
   }
 
-  private runShellJsCommand(command: string, options: Options, callback: ErrorCallback<string>): ChildProcess {
+  private runShellJsCommand(command: string, options: ShellOptions, callback: ErrorCallback<string>): ChildProcess {
     return shell.exec(command, options, (code: number, stdout: string, stderr: string) => {
       if (code !== 0) {
         this._logger.error({ obj: { code, command, options, stdout, stderr, defaultOptions } });
