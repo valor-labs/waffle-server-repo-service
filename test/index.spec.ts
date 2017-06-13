@@ -16,104 +16,104 @@ const assert = sinon.assert;
 const match = sinon.match;
 
 describe('Test Repos Service', () => {
-    let logger;
-    let errorStub;
+  let logger;
+  let errorStub;
 
-    beforeEach(() => {
-        logger = createLogger({name: 'logger'});
-        errorStub = sinon.stub(logger, 'error');
-        reposService.logger = logger;
+  beforeEach(() => {
+    logger = createLogger({name: 'logger'});
+    errorStub = sinon.stub(logger, 'error');
+    reposService.logger = logger;
+  });
+
+  it('should set new logger instance', () => {
+    const testLogger = createLogger({name: 'testLogger'});
+    expect(reposService.logger).to.not.equal(testLogger);
+    reposService.logger = testLogger;
+    expect((reposService as any)._logger).to.equal(testLogger);
+  });
+
+  it('should clone repo silently when repo wasn\'t cloned before', sandbox(function (done: ErrorCallback<string>): void {
+    const code = 0;
+    const stdout = '';
+    const stderr = '';
+    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
+    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
+    const gitRepo = 'git';
+    const command = `${gitRepo} clone ${githubUrl} ${pathToRepo} -b master`;
+
+    const options: Options = {gitRepo, githubUrl, pathToRepo};
+
+    const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+
+    reposService.silentClone(options, (error: string) => {
+      expect(error).to.not.exist;
+
+      assert.calledOnce(execStub);
+      assert.alwaysCalledWithExactly(execStub, command, options, match.func);
+
+      assert.notCalled(errorStub);
+
+      return done();
     });
+  }));
 
-    it('should set new logger instance', () => {
-        const testLogger = createLogger({name: 'testLogger'});
-        expect(reposService.logger).to.not.equal(testLogger);
-        reposService.logger = testLogger;
-        expect((reposService as any)._logger).to.equal(testLogger);
+  it('should do nothing if destination path is not empty directory', sandbox(function (done: ErrorCallback<string>): void {
+    const code = 1;
+    const stdout = '';
+    const stderr = 'fatal: destination path \'ddf--ws-testing\' already exists and is not an empty directory.';
+    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
+    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
+    const gitRepo = 'git';
+    const command = `${gitRepo} clone ${githubUrl} ${pathToRepo} -b master`;
+
+    const options: Options = {gitRepo, githubUrl, pathToRepo};
+
+    const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+
+    reposService.silentClone(options, (error: string) => {
+      expect(error).to.not.exist;
+
+      assert.calledOnce(execStub);
+      assert.alwaysCalledWithExactly(execStub, command, options, match.func);
+
+      assert.notCalled(errorStub);
+
+      return done();
     });
+  }));
 
-    it('should clone repo silently when repo wasn\'t cloned before', sandbox(function (done: ErrorCallback<string>): void {
-        const code = 0;
-        const stdout = '';
-        const stderr = '';
-        const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-        const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-        const gitRepo = 'git';
-        const command = `${gitRepo} clone ${githubUrl} ${pathToRepo} -b master`;
+  it('should respond with error when clonning process threw error', sandbox(function (done: ErrorCallback<string>): void {
+    const code = 128;
+    const stdout = '';
+    const stderr = 'Boo!';
+    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
+    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
+    const gitRepo = 'git';
+    const command = `${gitRepo} clone ${githubUrl} ${pathToRepo} -b master`;
 
-        const options: Options = {gitRepo, githubUrl, pathToRepo};
+    const options: Options = {gitRepo, githubUrl, pathToRepo};
 
-        const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+    const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
-        reposService.silentClone(options, (error: string) => {
-            expect(error).to.not.exist;
+    reposService.silentClone(options, (error: string) => {
+      expect(error).to.equal(stderr);
 
-            assert.calledOnce(execStub);
-            assert.alwaysCalledWithExactly(execStub, command, options, match.func);
+      assert.calledOnce(execStub);
+      assert.alwaysCalledWithExactly(execStub, command, options, match.func);
 
-            assert.notCalled(errorStub);
+      assert.calledOnce(errorStub);
+      assert.alwaysCalledWithExactly(errorStub, {
+        obj: {
+          code,
+          command,
+          options: defaults(options, defaultOptions),
+          defaultOptions,
+          stdout,
+          stderr
+        }
+      });
 
-            return done();
-        });
-    }));
-
-    it('should do nothing if destination path is not empty directory', sandbox(function (done: ErrorCallback<string>): void {
-        const code = 1;
-        const stdout = '';
-        const stderr = 'fatal: destination path \'ddf--ws-testing\' already exists and is not an empty directory.';
-        const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-        const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-        const gitRepo = 'git';
-        const command = `${gitRepo} clone ${githubUrl} ${pathToRepo} -b master`;
-
-        const options: Options = {gitRepo, githubUrl, pathToRepo};
-
-        const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
-
-        reposService.silentClone(options, (error: string) => {
-            expect(error).to.not.exist;
-
-            assert.calledOnce(execStub);
-            assert.alwaysCalledWithExactly(execStub, command, options, match.func);
-
-            assert.notCalled(errorStub);
-
-            return done();
-        });
-    }));
-
-    it('should respond with error when clonning process threw error', sandbox(function (done: ErrorCallback<string>): void {
-        const code = 128;
-        const stdout = '';
-        const stderr = 'Boo!';
-        const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-        const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-        const gitRepo = 'git';
-        const command = `${gitRepo} clone ${githubUrl} ${pathToRepo} -b master`;
-
-        const options: Options = {gitRepo, githubUrl, pathToRepo};
-
-        const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
-
-        reposService.silentClone(options, (error: string) => {
-            expect(error).to.equal(stderr);
-
-            assert.calledOnce(execStub);
-            assert.alwaysCalledWithExactly(execStub, command, options, match.func);
-
-            assert.calledOnce(errorStub);
-            assert.alwaysCalledWithExactly(errorStub, {
-                obj: {
-                    code,
-                    command,
-                    options: defaults(options, defaultOptions),
-                    defaultOptions,
-                    stdout,
-                    stderr
-                }
-            });
-
-            return done();
-        });
-    }));
+      return done();
+    });
+  }));
 });
