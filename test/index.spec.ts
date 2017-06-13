@@ -32,16 +32,16 @@ describe('Test Repos Service', () => {
     expect((reposService as any)._logger).to.equal(testLogger);
   });
 
-  it('should clone repo silently when repo wasn\'t cloned before', sandbox(function (done: ErrorCallback<string>): void {
+  it('should clone repo silently when repo wasn\'t cloned before', sandbox(function (done: Function): void {
     const code = 0;
     const stdout = '';
     const stderr = '';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
     const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const gitRepo = 'git';
-    const command = `${gitRepo} clone ${githubUrl} ${pathToRepo} -b master`;
+    const absolutePathToRepos = pathToRepo;
+    const command = `git -C ${pathToRepo} clone ${githubUrl} ${pathToRepo} -b master`;
 
-    const options: Options = {gitRepo, githubUrl, pathToRepo};
+    const options: Options = {absolutePathToRepos, githubUrl, pathToRepo};
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -57,16 +57,16 @@ describe('Test Repos Service', () => {
     });
   }));
 
-  it('should do nothing if destination path is not empty directory', sandbox(function (done: ErrorCallback<string>): void {
+  it('should do nothing if destination path is not empty directory', sandbox(function (done: Function): void {
     const code = 1;
     const stdout = '';
     const stderr = 'fatal: destination path \'ddf--ws-testing\' already exists and is not an empty directory.';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
     const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const gitRepo = 'git';
-    const command = `${gitRepo} clone ${githubUrl} ${pathToRepo} -b master`;
+    const absolutePathToRepos = pathToRepo;
+    const command = `git -C ${pathToRepo} clone ${githubUrl} ${pathToRepo} -b master`;
 
-    const options: Options = {gitRepo, githubUrl, pathToRepo};
+    const options: Options = {absolutePathToRepos, githubUrl, pathToRepo};
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -82,16 +82,16 @@ describe('Test Repos Service', () => {
     });
   }));
 
-  it('should respond with error when clonning process threw error', sandbox(function (done: ErrorCallback<string>): void {
+  it('should respond with error when clonning process threw error', sandbox(function (done: Function): void {
     const code = 128;
     const stdout = '';
     const stderr = 'Boo!';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
     const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const gitRepo = 'git';
-    const command = `${gitRepo} clone ${githubUrl} ${pathToRepo} -b master`;
+    const absolutePathToRepos = pathToRepo;
+    const command = `git -C ${pathToRepo} clone ${githubUrl} ${pathToRepo} -b master`;
 
-    const options: Options = {gitRepo, githubUrl, pathToRepo};
+    const options: Options = {absolutePathToRepos, githubUrl, pathToRepo};
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -112,6 +112,57 @@ describe('Test Repos Service', () => {
           stderr
         }
       });
+
+      return done();
+    });
+  }));
+
+  it('#clone', sandbox(function(done: Function): void {
+    const code = 0;
+    const stdout = '';
+    const stderr = '';
+    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
+    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
+    const absolutePathToRepos = pathToRepo;
+    const command = `git -C ${pathToRepo} clone ${githubUrl} ${pathToRepo} -b master`;
+
+    const options: Options = {absolutePathToRepos, githubUrl, pathToRepo, async: false, silent: false};
+
+    const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+
+    reposService.clone(options, (error: string) => {
+      expect(error).to.not.exist;
+
+      assert.calledOnce(execStub);
+      assert.alwaysCalledWithExactly(execStub, command, {async: false, silent: false}, match.func);
+
+      assert.notCalled(errorStub);
+
+      return done();
+    });
+  }));
+
+  it('#checkoutToBranch', sandbox(function(done: Function): void {
+    const code = 0;
+    const stdout = '';
+    const stderr = '';
+    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
+    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
+    const absolutePathToRepos = pathToRepo;
+    const branch = 'development';
+    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} checkout ${branch}`;
+
+    const options: Options = {absolutePathToRepos, githubUrl, pathToRepo, branch, async: false, silent: false};
+
+    const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+
+    reposService.checkoutToBranch(options, (error: string) => {
+      expect(error).to.not.exist;
+
+      assert.calledOnce(execStub);
+      assert.alwaysCalledWithExactly(execStub, command, {async: false, silent: false}, match.func);
+
+      assert.notCalled(errorStub);
 
       return done();
     });
