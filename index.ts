@@ -1,6 +1,6 @@
-import {createLogger, Logger} from 'bunyan';
-import {ChildProcess} from 'child_process';
-import {defaults, includes} from 'lodash';
+import { createLogger, Logger } from 'bunyan';
+import { ChildProcess } from 'child_process';
+import { defaults, includes } from 'lodash';
 import * as shell from 'shelljs';
 
 export interface Options {
@@ -32,8 +32,8 @@ class ReposService {
   }
 
   public silentClone(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const {gitRepo, githubUrl, pathToRepo, branch} = defaults(options, defaultOptions);
-    const command = `${gitRepo} clone ${githubUrl} ${pathToRepo} -b ${branch}`;
+    const { gitRepo, githubUrl, pathToRepo, branch } = defaults(options, defaultOptions);
+    const command = `git -C ${gitRepo} clone ${githubUrl} ${pathToRepo} -b ${branch}`;
 
     return shell.exec(command, options, (code: number, stdout: string, stderr: string) => {
       const isNotEmptyDirectory = includes(stderr, 'already exists and is not an empty directory');
@@ -43,7 +43,7 @@ class ReposService {
       }
 
       if (code !== 0) {
-        this._logger.error({obj: {code, command, options, stdout, stderr, defaultOptions}});
+        this._logger.error({ obj: { code, command, options, stdout, stderr, defaultOptions } });
 
         return callback(stderr);
       }
@@ -53,50 +53,50 @@ class ReposService {
   }
 
   public clone(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const {gitRepo, githubUrl, pathToRepo, branch} = defaults(options, defaultOptions);
-    const command = `${gitRepo} clone ${githubUrl} ${pathToRepo} -b ${branch}`;
+    const { gitRepo, githubUrl, pathToRepo, branch } = defaults(options, defaultOptions);
+    const command = `git -C ${gitRepo} clone ${githubUrl} ${pathToRepo} -b ${branch}`;
 
     return this.runShellJsCommand(command, options, callback);
   }
 
   public checkoutToBranch(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const {gitRepo, branch} = defaults(options, defaultOptions);
-    const command = `${gitRepo} checkout ${branch}`;
+    const { gitRepo, branch } = defaults(options, defaultOptions);
+    const command = `${this.getAbsolutePathToRepo(gitRepo)} checkout ${branch}`;
 
     return this.runShellJsCommand(command, options, callback);
   }
 
   public checkoutToCommit(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const {gitRepo, commit} = defaults(options, defaultOptions);
-    const command = `${gitRepo} checkout ${commit}`;
+    const { gitRepo, commit } = defaults(options, defaultOptions);
+    const command = `${this.getAbsolutePathToRepo(gitRepo)} checkout ${commit}`;
 
     return this.runShellJsCommand(command, options, callback);
   }
 
   public fetch(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const {gitRepo} = defaults(options, defaultOptions);
-    const command = `${gitRepo} fetch --all --prune`;
+    const { gitRepo } = defaults(options, defaultOptions);
+    const command = `${this.getAbsolutePathToRepo(gitRepo)} fetch --all --prune`;
 
     return this.runShellJsCommand(command, options, callback);
   }
 
   public reset(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const {gitRepo, branch} = defaults(options, defaultOptions);
-    const command = `${gitRepo} reset --hard origin/${branch}`;
+    const { gitRepo, branch } = defaults(options, defaultOptions);
+    const command = `${this.getAbsolutePathToRepo(gitRepo)} reset --hard origin/${branch}`;
 
     return this.runShellJsCommand(command, options, callback);
   }
 
   public pull(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const {gitRepo, branch} = defaults(options, defaultOptions);
-    const command = `${gitRepo} pull origin ${branch}`;
+    const { gitRepo, branch } = defaults(options, defaultOptions);
+    const command = `${this.getAbsolutePathToRepo(gitRepo)} pull origin ${branch}`;
 
     return this.runShellJsCommand(command, options, callback);
   }
 
   public clean(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const {gitRepo} = defaults(options, defaultOptions);
-    const command = `${gitRepo} clean -f -d`;
+    const { gitRepo } = defaults(options, defaultOptions);
+    const command = `${this.getAbsolutePathToRepo(gitRepo)} clean -f -d`;
 
     return this.runShellJsCommand(command, options, callback);
   }
@@ -104,7 +104,7 @@ class ReposService {
   private runShellJsCommand(command: string, options: Options, callback: ErrorCallback<string>): ChildProcess {
     return shell.exec(command, options, (code: number, stdout: string, stderr: string) => {
       if (code !== 0) {
-        this._logger.error({obj: {code, command, options, stdout, stderr, defaultOptions}});
+        this._logger.error({ obj: { code, command, options, stdout, stderr, defaultOptions } });
 
         return callback(stderr);
       }
@@ -113,9 +113,12 @@ class ReposService {
     });
   }
 
+  private getAbsolutePathToRepo(gitRepo: string): string {
+    return `git --git-dir=${gitRepo}/.git --work-tree=${gitRepo}`;
+  }
 }
 
-const defaultLogger = createLogger({name: 'defaultLogger'});
+const defaultLogger = createLogger({ name: 'defaultLogger' });
 const reposService = new ReposService(defaultLogger);
 
 export default reposService;

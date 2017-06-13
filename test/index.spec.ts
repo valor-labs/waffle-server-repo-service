@@ -38,8 +38,8 @@ describe('Test Repos Service', () => {
     const stderr = '';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
     const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const gitRepo = 'git';
-    const command = `${gitRepo} clone ${githubUrl} ${pathToRepo} -b master`;
+    const gitRepo = '';
+    const command = `git -C ${gitRepo} clone ${githubUrl} ${pathToRepo} -b master`;
 
     const options: Options = {gitRepo, githubUrl, pathToRepo};
 
@@ -63,8 +63,8 @@ describe('Test Repos Service', () => {
     const stderr = 'fatal: destination path \'ddf--ws-testing\' already exists and is not an empty directory.';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
     const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const gitRepo = 'git';
-    const command = `${gitRepo} clone ${githubUrl} ${pathToRepo} -b master`;
+    const gitRepo = '';
+    const command = `git -C ${gitRepo} clone ${githubUrl} ${pathToRepo} -b master`;
 
     const options: Options = {gitRepo, githubUrl, pathToRepo};
 
@@ -88,8 +88,8 @@ describe('Test Repos Service', () => {
     const stderr = 'Boo!';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
     const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const gitRepo = 'git';
-    const command = `${gitRepo} clone ${githubUrl} ${pathToRepo} -b master`;
+    const gitRepo = '';
+    const command = `git -C ${gitRepo} clone ${githubUrl} ${pathToRepo} -b master`;
 
     const options: Options = {gitRepo, githubUrl, pathToRepo};
 
