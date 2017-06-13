@@ -63,53 +63,49 @@ class ReposService {
     const { gitRepo, githubUrl, pathToRepo, branch } = defaults(options, defaultOptions);
     const command = `git -C ${gitRepo} clone ${githubUrl} ${pathToRepo} -b ${branch}`;
 
-    return this.runShellJsCommand(command, this.shellOptions(options), callback);
+    return this.runShellJsCommand(command, pick(options, 'silent', 'async'), callback);
   }
 
   public checkoutToBranch(options: Options, callback: ErrorCallback<string>): ChildProcess {
     const { gitRepo, branch } = defaults(options, defaultOptions);
     const command = `${this.getAbsolutePathToRepo(gitRepo)} checkout ${branch}`;
 
-    return this.runShellJsCommand(command, this.shellOptions(options), callback);
+    return this.runShellJsCommand(command, pick(options, 'silent', 'async'), callback);
   }
 
   public checkoutToCommit(options: Options, callback: ErrorCallback<string>): ChildProcess {
     const { gitRepo, commit } = defaults(options, defaultOptions);
     const command = `${this.getAbsolutePathToRepo(gitRepo)} checkout ${commit}`;
 
-    return this.runShellJsCommand(command, this.shellOptions(options), callback);
+    return this.runShellJsCommand(command, pick(options, 'silent', 'async'), callback);
   }
 
   public fetch(options: Options, callback: ErrorCallback<string>): ChildProcess {
     const { gitRepo } = defaults(options, defaultOptions);
     const command = `${this.getAbsolutePathToRepo(gitRepo)} fetch --all --prune`;
 
-    return this.runShellJsCommand(command, this.shellOptions(options), callback);
+    return this.runShellJsCommand(command, pick(options, 'silent', 'async'), callback);
   }
 
   public reset(options: Options, callback: ErrorCallback<string>): ChildProcess {
     const { gitRepo, branch } = defaults(options, defaultOptions);
     const command = `${this.getAbsolutePathToRepo(gitRepo)} reset --hard origin/${branch}`;
 
-    return this.runShellJsCommand(command, this.shellOptions(options), callback);
+    return this.runShellJsCommand(command, pick(options, 'silent', 'async'), callback);
   }
 
   public pull(options: Options, callback: ErrorCallback<string>): ChildProcess {
     const { gitRepo, branch } = defaults(options, defaultOptions);
     const command = `${this.getAbsolutePathToRepo(gitRepo)} pull origin ${branch}`;
 
-    return this.runShellJsCommand(command, this.shellOptions(options), callback);
+    return this.runShellJsCommand(command, pick(options, 'silent', 'async'), callback);
   }
 
   public clean(options: Options, callback: ErrorCallback<string>): ChildProcess {
     const { gitRepo } = defaults(options, defaultOptions);
     const command = `${this.getAbsolutePathToRepo(gitRepo)} clean -f -d`;
 
-    return this.runShellJsCommand(command, this.shellOptions(options), callback);
-  }
-
-  private shellOptions(options: Options): ShellOptions {
-    return pick(options, 'silent', 'async');
+    return this.runShellJsCommand(command, pick(options, 'silent', 'async'), callback);
   }
 
   private runShellJsCommand(command: string, options: ShellOptions, callback: ErrorCallback<string>): ChildProcess {
