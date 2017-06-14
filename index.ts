@@ -2,6 +2,7 @@ import { createLogger, Logger } from 'bunyan';
 import { ChildProcess } from 'child_process';
 import { defaults, includes, pick } from 'lodash';
 import * as shell from 'shelljs';
+import * as fs from 'fs';
 
 export interface DefaultOptions {
   silent: Boolean;
@@ -109,6 +110,55 @@ class ReposService {
     const command = this.wrapGitCommand(pathToRepo,`clean -f -d`);
 
     return this.runShellJsCommand(command, options, callback);
+  }
+
+  public getAmountLines(options: Options, callback: ErrorCallback<string>): ChildProcess {
+    const {pathToRepo} = defaults(options, defaultOptions);
+    let command = `wc -l ${pathToRepo}/*.csv | grep "total$"`;
+
+    return this.runShellJsCommand(command, options, callback);
+  }
+
+  public checkSshKey(options: ShellOptions, callback: ErrorCallback<string>): ChildProcess {
+    let command = `ssh -T git@github.com`;
+
+    return shell.exec(command, options, (code: number, stdout: string, stderr: string) => {
+      if (code > 1) {
+        const error = `[code=${code}] ${stderr}\n\tPlease, follow the detailed instruction 'https://github.com/Gapminder/waffle-server-import-cli#ssh-key' for continue working with CLI tool.`;
+
+        return callback(error);
+      }
+
+      return callback();
+    });
+  }
+
+  public makeDirForce(options: Options, onDirMade: ErrorCallback<string>): void {
+    const { pathToRepo } = defaults(options, defaultOptions);
+
+    return fs.exists(pathToRepo,(exists: boolean) => {
+      if (!exists) {
+        shell.mkdir('-p', pathToRepo);
+
+        return onDirMade(shell.error());
+      }
+
+      return onDirMade();
+    });
+  }
+
+  public removeDirForce(options: Options, onDirCleaned: ErrorCallback<string>): void {
+    const { absolutePathToRepos, pathToRepo } = defaults(options, defaultOptions);
+
+    return fs.exists(pathToRepo || absolutePathToRepos,(exists: boolean) => {
+      if (!exists) {
+        shell.rm('-rf', absolutePathToRepos + '/*');
+
+        return onDirCleaned(shell.error());
+      }
+
+      return onDirCleaned(`Directory '${pathToRepo || absolutePathToRepos}' is not exist!`);
+    });
   }
 
   private runShellJsCommand(command: string, options: Options, callback: ErrorCallback<string>): ChildProcess {
