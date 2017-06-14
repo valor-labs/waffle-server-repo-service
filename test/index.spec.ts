@@ -150,7 +150,7 @@ describe('Test Repos Service', () => {
     const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
     const absolutePathToRepos = pathToRepo;
     const branch = 'development';
-    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} checkout ${branch}`;
+    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} checkout ${branch}`;
 
     const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: false, silent: false };
 
@@ -176,7 +176,7 @@ describe('Test Repos Service', () => {
     const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
     const absolutePathToRepos = pathToRepo;
     const commit = 'HEAD';
-    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} checkout ${commit}`;
+    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} checkout ${commit}`;
 
     const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, commit, async: false, silent: false };
 
@@ -201,7 +201,7 @@ describe('Test Repos Service', () => {
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
     const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
     const absolutePathToRepos = pathToRepo;
-    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} fetch --all --prune`;
+    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} fetch --all --prune`;
 
     const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, async: false, silent: false };
 
@@ -227,7 +227,7 @@ describe('Test Repos Service', () => {
     const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
     const absolutePathToRepos = pathToRepo;
     const branch = 'development';
-    const command = `git --git-dir=${absolutePathToRepos}/.git --work-tree=${absolutePathToRepos} reset --hard origin/${branch}`;
+    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} reset --hard origin/${branch}`;
 
     const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: false, silent: false };
 
@@ -253,7 +253,7 @@ describe('Test Repos Service', () => {
     const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
     const absolutePathToRepos = pathToRepo;
     const branch = 'development';
-    const command = `git --git-dir=${absolutePathToRepos}/.git --work-tree=${absolutePathToRepos} pull origin ${branch}`;
+    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} pull origin ${branch}`;
 
     const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: false, silent: false };
 
@@ -279,7 +279,7 @@ describe('Test Repos Service', () => {
     const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
     const absolutePathToRepos = pathToRepo;
     const branch = '';
-    const command = `git --git-dir=${absolutePathToRepos}/.git --work-tree=${absolutePathToRepos} clean -f -d`;
+    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} clean -f -d`;
 
     const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: false, silent: false };
 
