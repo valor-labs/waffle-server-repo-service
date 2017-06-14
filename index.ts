@@ -69,43 +69,43 @@ class ReposService {
   }
 
   public checkoutToBranch(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const { absolutePathToRepos, branch } = defaults(options, defaultOptions);
-    const command = this.wrapGitCommand(absolutePathToRepos, `checkout ${branch}`);
+    const { absolutePathToRepos, pathToRepo, branch } = defaults(options, defaultOptions);
+    const command = this.wrapGitCommand(absolutePathToRepos, pathToRepo, `checkout ${branch}`);
 
     return this.runShellJsCommand(command, options, callback);
   }
 
   public checkoutToCommit(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const { absolutePathToRepos, commit } = defaults(options, defaultOptions);
-    const command = this.wrapGitCommand(absolutePathToRepos, `checkout ${commit}`);
+    const { absolutePathToRepos, pathToRepo, commit } = defaults(options, defaultOptions);
+    const command = this.wrapGitCommand(absolutePathToRepos, pathToRepo, `checkout ${commit}`);
 
     return this.runShellJsCommand(command, options, callback);
   }
 
   public fetch(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const { absolutePathToRepos } = defaults(options, defaultOptions);
-    const command = this.wrapGitCommand(absolutePathToRepos, `fetch --all --prune`);
+    const { absolutePathToRepos, pathToRepo } = defaults(options, defaultOptions);
+    const command = this.wrapGitCommand(absolutePathToRepos, pathToRepo, `fetch --all --prune`);
 
     return this.runShellJsCommand(command, options, callback);
   }
 
   public reset(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const { absolutePathToRepos, branch } = defaults(options, defaultOptions);
-    const command = this.wrapGitCommand(absolutePathToRepos, `reset --hard origin/${branch}`);
+    const { absolutePathToRepos, pathToRepo, branch } = defaults(options, defaultOptions);
+    const command = this.wrapGitCommand(absolutePathToRepos, pathToRepo, `reset --hard origin/${branch}`);
 
     return this.runShellJsCommand(command, options, callback);
   }
 
   public pull(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const { absolutePathToRepos, branch } = defaults(options, defaultOptions);
-    const command = this.wrapGitCommand(absolutePathToRepos, `pull origin ${branch}`);
+    const { absolutePathToRepos, pathToRepo, branch } = defaults(options, defaultOptions);
+    const command = this.wrapGitCommand(absolutePathToRepos, pathToRepo, `pull origin ${branch}`);
 
     return this.runShellJsCommand(command, options, callback);
   }
 
   public clean(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const { absolutePathToRepos } = defaults(options, defaultOptions);
-    const command = this.wrapGitCommand(absolutePathToRepos, `clean -f -d`);
+    const { absolutePathToRepos, pathToRepo } = defaults(options, defaultOptions);
+    const command = this.wrapGitCommand(absolutePathToRepos, pathToRepo, `clean -f -d`);
 
     return this.runShellJsCommand(command, options, callback);
   }
@@ -174,8 +174,8 @@ class ReposService {
     });
   }
 
-  private wrapGitCommand(absolutePathToRepos: string, command: string): string {
-    return `git --git-dir=${absolutePathToRepos}/.git --work-tree=${absolutePathToRepos} ${command}`;
+  private wrapGitCommand(absolutePathToRepos: string, pathToRepo:string, command: string): string {
+    return `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} ${command}`;
   }
 
   private getExecOptions(options: Options): ExecOptions {
