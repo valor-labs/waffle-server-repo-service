@@ -1,9 +1,9 @@
 import * as Logger from 'bunyan';
-import {ChildProcess} from 'child_process';
+import { ChildProcess } from 'child_process';
 import * as fs from 'fs';
-import {defaults, includes, pick} from 'lodash';
+import { defaults, includes, pick } from 'lodash';
 import * as shell from 'shelljs';
-import {ExecOptions} from 'shelljs';
+import { ExecOptions } from 'shelljs';
 
 export interface DefaultOptions {
   silent: Boolean;
@@ -40,7 +40,7 @@ class ReposService {
   }
 
   public silentClone(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const {absolutePathToRepos, githubUrl, pathToRepo, branch} = defaults(options, defaultOptions);
+    const { absolutePathToRepos, githubUrl, pathToRepo, branch } = defaults(options, defaultOptions);
     const command = `git -C ${absolutePathToRepos} clone ${githubUrl} ${pathToRepo} -b ${branch}`;
     const execOptions: ExecOptions = this.getExecOptions(options);
 
@@ -52,7 +52,7 @@ class ReposService {
       }
 
       if (code !== 0) {
-        this._logger.error({obj: {code, command, options, stdout, stderr, defaultOptions}});
+        this._logger.error({ obj: { code, command, options, stdout, stderr, defaultOptions } });
 
         return callback(stderr);
       }
@@ -62,65 +62,66 @@ class ReposService {
   }
 
   public clone(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const {absolutePathToRepos, githubUrl, pathToRepo, branch} = defaults(options, defaultOptions);
+    const { absolutePathToRepos, githubUrl, pathToRepo, branch } = defaults(options, defaultOptions);
     const command = `git -C ${absolutePathToRepos} clone ${githubUrl} ${pathToRepo} -b ${branch}`;
 
     return this.runShellJsCommand(command, options, callback);
   }
 
   public checkoutToBranch(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const {pathToRepo, branch} = defaults(options, defaultOptions);
-    const command = this.wrapGitCommand(pathToRepo, `checkout ${branch}`);
+    const { absolutePathToRepos, branch } = defaults(options, defaultOptions);
+    const command = this.wrapGitCommand(absolutePathToRepos, `checkout ${branch}`);
 
     return this.runShellJsCommand(command, options, callback);
   }
 
   public checkoutToCommit(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const {pathToRepo, commit} = defaults(options, defaultOptions);
-    const command = this.wrapGitCommand(pathToRepo, `checkout ${commit}`);
+    const { absolutePathToRepos, commit } = defaults(options, defaultOptions);
+    const command = this.wrapGitCommand(absolutePathToRepos, `checkout ${commit}`);
 
     return this.runShellJsCommand(command, options, callback);
   }
 
   public fetch(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const {pathToRepo} = defaults(options, defaultOptions);
-    const command = this.wrapGitCommand(pathToRepo, `fetch --all --prune`);
+    const { absolutePathToRepos } = defaults(options, defaultOptions);
+    const command = this.wrapGitCommand(absolutePathToRepos, `fetch --all --prune`);
 
     return this.runShellJsCommand(command, options, callback);
   }
 
   public reset(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const {pathToRepo, branch} = defaults(options, defaultOptions);
-    const command = this.wrapGitCommand(pathToRepo, `reset --hard origin/${branch}`);
+    const { absolutePathToRepos, branch } = defaults(options, defaultOptions);
+    const command = this.wrapGitCommand(absolutePathToRepos, `reset --hard origin/${branch}`);
 
     return this.runShellJsCommand(command, options, callback);
   }
 
   public pull(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const {pathToRepo, branch} = defaults(options, defaultOptions);
-    const command = this.wrapGitCommand(pathToRepo, `pull origin ${branch}`);
+    const { absolutePathToRepos, branch } = defaults(options, defaultOptions);
+    const command = this.wrapGitCommand(absolutePathToRepos, `pull origin ${branch}`);
 
     return this.runShellJsCommand(command, options, callback);
   }
 
   public clean(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const {pathToRepo} = defaults(options, defaultOptions);
-    const command = this.wrapGitCommand(pathToRepo, `clean -f -d`);
+    const { absolutePathToRepos } = defaults(options, defaultOptions);
+    const command = this.wrapGitCommand(absolutePathToRepos, `clean -f -d`);
 
     return this.runShellJsCommand(command, options, callback);
   }
 
   public getAmountLines(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const {pathToRepo} = defaults(options, defaultOptions);
-    let command = `wc -l ${pathToRepo}/*.csv | grep "total$"`;
+    const { absolutePathToRepos } = defaults(options, defaultOptions);
+    let command = `wc -l ${absolutePathToRepos}/*.csv | grep "total$"`;
 
     return this.runShellJsCommand(command, options, callback);
   }
 
-  public checkSshKey(options: ExecOptions, callback: ErrorCallback<string>): ChildProcess {
+  public checkSshKey(options: Options, callback: ErrorCallback<string>): ChildProcess {
     let command = `ssh -T git@github.com`;
+    const execOptions: ExecOptions = this.getExecOptions(options);
 
-    return shell.exec(command, options, (code: number, stdout: string, stderr: string) => {
+    return shell.exec(command, execOptions, (code: number, stdout: string, stderr: string) => {
       if (code > 1) {
         const error = `[code=${code}] ${stderr}\n\tPlease, follow the detailed instruction 'https://github.com/Gapminder/waffle-server-import-cli#ssh-key' for continue working with CLI tool.`;
 
@@ -132,7 +133,7 @@ class ReposService {
   }
 
   public makeDirForce(options: Options, onDirMade: ErrorCallback<string>): void {
-    const {pathToRepo} = defaults(options, defaultOptions);
+    const { pathToRepo } = defaults(options, defaultOptions);
 
     return fs.exists(pathToRepo, (exists: boolean) => {
       if (!exists) {
@@ -146,7 +147,7 @@ class ReposService {
   }
 
   public removeDirForce(options: Options, onDirCleaned: ErrorCallback<string>): void {
-    const {absolutePathToRepos, pathToRepo} = defaults(options, defaultOptions);
+    const { absolutePathToRepos, pathToRepo } = defaults(options, defaultOptions);
 
     return fs.exists(pathToRepo || absolutePathToRepos, (exists: boolean) => {
       if (!exists) {
@@ -164,7 +165,7 @@ class ReposService {
 
     return shell.exec(command, execOptions, (code: number, stdout: string, stderr: string) => {
       if (code !== 0) {
-        this._logger.error({obj: {code, command, options, stdout, stderr, defaultOptions}});
+        this._logger.error({ obj: { code, command, options, stdout, stderr, defaultOptions } });
 
         return callback(stderr);
       }
@@ -173,8 +174,8 @@ class ReposService {
     });
   }
 
-  private wrapGitCommand(pathToRepo: string, command: string): string {
-    return `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} ${command}`;
+  private wrapGitCommand(absolutePathToRepos: string, command: string): string {
+    return `git --git-dir=${absolutePathToRepos}/.git --work-tree=${absolutePathToRepos} ${command}`;
   }
 
   private getExecOptions(options: Options): ExecOptions {
@@ -182,7 +183,7 @@ class ReposService {
   }
 }
 
-const defaultLogger = Logger.createLogger({name: 'defaultLogger'});
+const defaultLogger = Logger.createLogger({ name: 'defaultLogger' });
 const reposService = new ReposService(defaultLogger);
 
 export default reposService;
