@@ -1,7 +1,7 @@
 /* tslint:disable:no-invalid-this*/
 /* tslint:disable:no-unused-expression*/
 
-import {createLogger, Logger} from 'bunyan';
+import * as Logger from 'bunyan';
 import {expect} from 'chai';
 import {defaults} from 'lodash';
 import 'mocha';
@@ -20,13 +20,13 @@ describe('Test Repos Service', () => {
   let errorStub;
 
   beforeEach(() => {
-    logger = createLogger({name: 'logger'});
+    logger = Logger.createLogger({name: 'logger'});
     errorStub = sinon.stub(logger, 'error');
     reposService.logger = logger;
   });
 
   it('should set new logger instance', () => {
-    const testLogger = createLogger({name: 'testLogger'});
+    const testLogger = Logger.createLogger({name: 'testLogger'});
     expect(reposService.logger).to.not.equal(testLogger);
     reposService.logger = testLogger;
     expect((reposService as any)._logger).to.equal(testLogger);
@@ -49,7 +49,7 @@ describe('Test Repos Service', () => {
       expect(error).to.not.exist;
 
       assert.calledOnce(execStub);
-      assert.alwaysCalledWithExactly(execStub, command, options, match.func);
+      assert.alwaysCalledWithExactly(execStub, command, {async: true, silent: true}, match.func);
 
       assert.notCalled(errorStub);
 
@@ -74,7 +74,7 @@ describe('Test Repos Service', () => {
       expect(error).to.not.exist;
 
       assert.calledOnce(execStub);
-      assert.alwaysCalledWithExactly(execStub, command, options, match.func);
+      assert.alwaysCalledWithExactly(execStub, command, {async: true, silent: true}, match.func);
 
       assert.notCalled(errorStub);
 
@@ -99,7 +99,7 @@ describe('Test Repos Service', () => {
       expect(error).to.equal(stderr);
 
       assert.calledOnce(execStub);
-      assert.alwaysCalledWithExactly(execStub, command, options, match.func);
+      assert.alwaysCalledWithExactly(execStub, command, {async: true, silent: true}, match.func);
 
       assert.calledOnce(errorStub);
       assert.alwaysCalledWithExactly(errorStub, {

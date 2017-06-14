@@ -4,6 +4,7 @@
   "description": "Module for working with git repos on WS and CLI tool",
   "main": "index.js",
   "scripts": {
+    "install": "npm run tsc",
     "build": "npm run tsc",
     "test": "npm run spec",
     "spec": "mocha --reporter mochawesome --reporter-options reportDir=specReports,reportFilename=specReport --compilers ts:ts-node/register 'test/**/*.spec.ts'",
@@ -13,7 +14,10 @@
     "spec:remap": "remap-istanbul -i coverage/coverage.json -e node_modules,coverage -t html -o coverage/remap-istanbul",
     "tsc": "tsc --project tsconfig.json"
   },
-  "pre-commit": ["test"],
+  "pre-commit": [
+    "tsc",
+    "test"
+  ],
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/Gapminder/waffle-server-repo-service.git"
@@ -41,7 +45,10 @@
   "homepage": "https://github.com/Gapminder/waffle-server-repo-service#readme",
   "dependencies": {
     "@types/async": "^2.0.40",
+    "@types/bunyan": "^1.8.0",
+    "@types/core-js": "^0.9.41",
     "@types/lodash": "^4.14.66",
+    "@types/shelljs": "^0.7.2",
     "async": "^2.4.1",
     "lodash": "^4.17.4",
     "path": "^0.12.7",
@@ -50,7 +57,7 @@
   "devDependencies": {
     "@types/chai": "^4.0.0",
     "@types/mocha": "^2.2.41",
-    "@types/node": "^7.0.29",
+    "@types/node": "^7.0.31",
     "@types/sinon": "^2.3.1",
     "@types/sinon-test": "^1.0.2",
     "bunyan": "^1.8.10",
