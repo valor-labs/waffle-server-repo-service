@@ -734,24 +734,16 @@ describe('Test Repos Service', () => {
   }));
 
   it('should make a dir for a repo', sandbox(function (done: Function): void {
-    const code = 0;
-    const stdout = '';
-    const stderr = '';
-    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
     const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const branch = '';
-    const command = `-p`;
-
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: false, silent: false };
+    const option = `-p`;
 
     const execStub = this.stub(shell, 'mkdir');
 
-    reposService.makeDirForce(options, (error: string) => {
+    reposService.makeDirForce(pathToRepo, (error: string) => {
       expect(error).to.not.exist;
 
       assert.calledOnce(execStub);
-      assert.alwaysCalledWithExactly(execStub, command, pathToRepo);
+      assert.alwaysCalledWithExactly(execStub, option, pathToRepo);
 
       assert.notCalled(errorStub);
 
@@ -760,24 +752,16 @@ describe('Test Repos Service', () => {
   }));
 
   it('should remove directory', sandbox(function (done: Function): void {
-    const code = 0;
-    const stdout = '';
-    const stderr = '';
-    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
     const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const branch = '';
-    const command = `-rf`;
-
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: false, silent: false };
+    const option = `-rf`;
 
     const execStub = this.stub(shell, 'rm');
 
-    reposService.removeDirForce(options, (error: string) => {
+    reposService.removeDirForce(pathToRepo, (error: string) => {
       expect(error).to.not.exist;
 
       assert.calledOnce(execStub);
-      assert.alwaysCalledWithExactly(execStub, command, `${pathToRepo}/*`);
+      assert.alwaysCalledWithExactly(execStub, option, `${pathToRepo}/*`);
 
       assert.notCalled(errorStub);
 

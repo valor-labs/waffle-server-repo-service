@@ -1,7 +1,7 @@
 import * as Logger from 'bunyan';
 import { ChildProcess } from 'child_process';
 import * as fs from 'fs';
-import { defaults, includes, pick } from 'lodash';
+import { defaults, includes, pick, isEmpty, isArray } from 'lodash';
 import * as shell from 'shelljs';
 import { ExecOptions } from 'shelljs';
 
@@ -10,12 +10,15 @@ export interface DefaultOptions {
   async: Boolean;
   branch: string;
   commit: string;
+  prettifyResult: Function;
 }
 
 export interface Options extends Partial<DefaultOptions> {
   absolutePathToRepos: string;
   githubUrl: string;
   pathToRepo: string;
+  relativeFilePath?: string;
+  files?: string[];
 }
 
 // keyof ExecOptions
@@ -25,7 +28,8 @@ export const defaultOptions: DefaultOptions = {
   silent: true,
   async: true,
   branch: 'master',
-  commit: 'HEAD'
+  commit: 'HEAD',
+  prettifyResult: (value: string) => value,
 };
 
 class ReposService {
@@ -110,9 +114,28 @@ class ReposService {
     return this.runShellJsCommand(command, options, callback);
   }
 
+  public log(options: Options, callback: ErrorCallback<string>): ChildProcess {
+    const {absolutePathToRepos, pathToRepo} = defaults(options, defaultOptions);
+    const command = this.wrapGitCommand(absolutePathToRepos, pathToRepo, `log --pretty=format:%h%n%ad%n%s%n%n`);
+
+    return this.runShellJsCommand(command, options, callback);
+  }
+
+  public show(options: Options, callback: ErrorCallback<string>): ChildProcess {
+    const {absolutePathToRepos, pathToRepo, commit, relativeFilePath} = defaults(options, defaultOptions);
+    const command = this.wrapGitCommand(absolutePathToRepos, pathToRepo, `show ${commit}:${relativeFilePath}`);
+
+    return this.runShellJsCommand(command, options, callback);
+  }
+
   public getAmountLines(options: Options, callback: ErrorCallback<string>): ChildProcess {
-    const { absolutePathToRepos } = defaults(options, defaultOptions);
-    let command = `wc -l ${absolutePathToRepos}/*.csv | grep "total$"`;
+    const {absolutePathToRepos, pathToRepo, files} = defaults(options, defaultOptions);
+
+    let command = `wc -l ${pathToRepo}/*.csv | grep "total$"`;
+
+    if (isArray(files)) {
+      command = isEmpty(files) ? 'echo 0' : `wc -l "${files}" | grep "total$"`;
+    }
 
     return this.runShellJsCommand(command, options, callback);
   }
@@ -123,7 +146,7 @@ class ReposService {
 
     return shell.exec(command, execOptions, (code: number, stdout: string, stderr: string) => {
       if (code > 1) {
-        const error = `[code=${code}] ${stderr}\n\tPlease, follow the detailed instruction 'https://github.com/Gapminder/waffle-server-import-cli#ssh-key' for continue working with CLI tool.`;
+        const error = `[code=${code}]\n${stderr}\nPlease, follow the detailed instruction 'https://github.com/Gapminder/waffle-server-import-cli#ssh-key' for continue working with CLI tool.`;
 
         return callback(error);
       }
@@ -132,12 +155,10 @@ class ReposService {
     });
   }
 
-  public makeDirForce(options: Options, onDirMade: ErrorCallback<string>): void {
-    const { pathToRepo } = defaults(options, defaultOptions);
-
-    return fs.exists(pathToRepo, (exists: boolean) => {
+  public makeDirForce(pathToMake: string, onDirMade: ErrorCallback<string>): void {
+    return fs.exists(pathToMake, (exists: boolean) => {
       if (!exists) {
-        shell.mkdir('-p', pathToRepo);
+        shell.mkdir('-p', pathToMake);
 
         return onDirMade(shell.error());
       }
@@ -146,21 +167,20 @@ class ReposService {
     });
   }
 
-  public removeDirForce(options: Options, onDirCleaned: ErrorCallback<string>): void {
-    const { absolutePathToRepos, pathToRepo } = defaults(options, defaultOptions);
-
-    return fs.exists(pathToRepo || absolutePathToRepos, (exists: boolean) => {
+  public removeDirForce(pathToRemove: string, onDirRemoved: ErrorCallback<string>): void {
+    return fs.exists(pathToRemove, (exists: boolean) => {
       if (!exists) {
-        shell.rm('-rf', absolutePathToRepos + '/*');
+        shell.rm('-rf', pathToRemove + '/*');
 
-        return onDirCleaned(shell.error());
+        return onDirRemoved(shell.error());
       }
 
-      return onDirCleaned(`Directory '${pathToRepo || absolutePathToRepos}' is not exist!`);
+      return onDirRemoved(`Directory '${pathToRemove}' is not exist!`);
     });
   }
 
-  private runShellJsCommand(command: string, options: Options, callback: ErrorCallback<string>): ChildProcess {
+  private runShellJsCommand(command: string, options: Options, callback: AsyncResultCallback<any, string>): ChildProcess {
+    const {prettifyResult} = options;
     const execOptions: ExecOptions = this.getExecOptions(options);
 
     return shell.exec(command, execOptions, (code: number, stdout: string, stderr: string) => {
@@ -170,7 +190,7 @@ class ReposService {
         return callback(stderr);
       }
 
-      return callback();
+      return callback(null, prettifyResult(stdout));
     });
   }
 
