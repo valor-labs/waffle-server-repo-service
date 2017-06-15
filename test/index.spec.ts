@@ -142,7 +142,42 @@ describe('Test Repos Service', () => {
     });
   }));
 
-  it('should checkout to given branch', sandbox(function (done: Function): void {
+  it('should respond with an error', sandbox(function (done: Function): void {
+    const code = 128;
+    const stdout = '';
+    const stderr = 'Boo!';
+    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
+    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
+    const absolutePathToRepos = pathToRepo;
+    const command = `git -C ${pathToRepo} clone ${githubUrl} ${pathToRepo} -b master`;
+
+    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo };
+
+    const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+
+    reposService.clone(options, (error: string) => {
+      expect(error).to.equal(stderr);
+
+      assert.calledOnce(execStub);
+      assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
+
+      assert.calledOnce(errorStub);
+      assert.alwaysCalledWithExactly(errorStub, {
+        obj: {
+          code,
+          command,
+          options: defaults(options, defaultOptions),
+          defaultOptions,
+          stdout,
+          stderr
+        }
+      });
+
+      return done();
+    });
+  }));
+
+  it('should checkout to branch development', sandbox(function (done: Function): void {
     const code = 0;
     const stdout = '';
     const stderr = '';
@@ -163,6 +198,66 @@ describe('Test Repos Service', () => {
       assert.alwaysCalledWithExactly(execStub, command, { async: false, silent: false }, match.func);
 
       assert.notCalled(errorStub);
+
+      return done();
+    });
+  }));
+
+  it('should checkout to master whithout errors, if branch wasn\'t given', sandbox(function (done: Function): void {
+    const code = 0;
+    const stdout = '';
+    const stderr = '';
+    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
+    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
+    const absolutePathToRepos = pathToRepo;
+    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} checkout master`;
+
+    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, async: false, silent: false };
+
+    const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+
+    reposService.checkoutToBranch(options, (error: string) => {
+      expect(error).to.not.exist;
+
+      assert.calledOnce(execStub);
+      assert.alwaysCalledWithExactly(execStub, command, { async: false, silent: false }, match.func);
+
+      assert.notCalled(errorStub);
+
+      return done();
+    });
+  }));
+
+  it('should respond with error when checkout process threw error', sandbox(function (done: Function): void {
+    const code = 128;
+    const stdout = '';
+    const stderr = 'Boo!';
+    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
+    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
+    const absolutePathToRepos = pathToRepo;
+    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} checkout master`;
+
+    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, async: true, silent: true };
+
+    const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+
+    reposService.checkoutToBranch(options, (error: string) => {
+      expect(error).to.equal(stderr);
+
+      assert.calledOnce(execStub);
+      assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
+
+      assert.calledOnce(errorStub);
+      assert.alwaysCalledWithExactly(errorStub, {
+        obj: {
+          code,
+          command,
+          options: defaults(options, defaultOptions),
+          defaultOptions,
+          stdout,
+          stderr
+        }
+      });
 
       return done();
     });
@@ -194,6 +289,67 @@ describe('Test Repos Service', () => {
     });
   }));
 
+  it('should checkout to HEAD, if commit wasn\'t given', sandbox(function (done: Function): void {
+    const code = 0;
+    const stdout = '';
+    const stderr = '';
+    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
+    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
+    const absolutePathToRepos = pathToRepo;
+    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} checkout HEAD`;
+
+    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, async: false, silent: false };
+
+    const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+
+    reposService.checkoutToCommit(options, (error: string) => {
+      expect(error).to.not.exist;
+
+      assert.calledOnce(execStub);
+      assert.alwaysCalledWithExactly(execStub, command, { async: false, silent: false }, match.func);
+
+      assert.notCalled(errorStub);
+
+      return done();
+    });
+  }));
+
+  it('should respond with error when checkout to commit process threw error', sandbox(function (done: Function): void {
+    const code = 128;
+    const stdout = '';
+    const stderr = 'Boo!';
+    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
+    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
+    const absolutePathToRepos = pathToRepo;
+    const commit = 'HEAD';
+    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} checkout ${commit}`;
+
+    const options: Options = { absolutePathToRepos, githubUrl, commit, pathToRepo, async: true, silent: true };
+
+    const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+
+    reposService.checkoutToCommit(options, (error: string) => {
+      expect(error).to.equal(stderr);
+
+      assert.calledOnce(execStub);
+      assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
+
+      assert.calledOnce(errorStub);
+      assert.alwaysCalledWithExactly(errorStub, {
+        obj: {
+          code,
+          command,
+          options: defaults(options, defaultOptions),
+          defaultOptions,
+          stdout,
+          stderr
+        }
+      });
+
+      return done();
+    });
+  }));
+
   it('should fetch from remote', sandbox(function (done: Function): void {
     const code = 0;
     const stdout = '';
@@ -219,6 +375,41 @@ describe('Test Repos Service', () => {
     });
   }));
 
+  it('should respond with error while fetch process threw error', sandbox(function (done: Function): void {
+    const code = 128;
+    const stdout = '';
+    const stderr = 'Boo!';
+    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
+    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
+    const absolutePathToRepos = pathToRepo;
+    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} fetch --all --prune`;
+
+    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, async: true, silent: true };
+
+    const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+
+    reposService.fetch(options, (error: string) => {
+      expect(error).to.equal(stderr);
+
+      assert.calledOnce(execStub);
+      assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
+
+      assert.calledOnce(errorStub);
+      assert.alwaysCalledWithExactly(errorStub, {
+        obj: {
+          code,
+          command,
+          options: defaults(options, defaultOptions),
+          defaultOptions,
+          stdout,
+          stderr
+        }
+      });
+
+      return done();
+    });
+  }));
+
   it('should reset to given branch', sandbox(function (done: Function): void {
     const code = 0;
     const stdout = '';
@@ -230,6 +421,67 @@ describe('Test Repos Service', () => {
     const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} reset --hard origin/${branch}`;
 
     const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: false, silent: false };
+
+    const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+
+    reposService.reset(options, (error: string) => {
+      expect(error).to.not.exist;
+
+      assert.calledOnce(execStub);
+      assert.alwaysCalledWithExactly(execStub, command, { async: false, silent: false }, match.func);
+
+      assert.notCalled(errorStub);
+
+      return done();
+    });
+  }));
+
+  it('should respond with error while reset process threw error', sandbox(function (done: Function): void {
+    const code = 128;
+    const stdout = '';
+    const stderr = 'Boo!';
+    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
+    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
+    const absolutePathToRepos = pathToRepo;
+    const branch = 'development';
+    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} reset --hard origin/${branch}`;
+
+    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: true, silent: true };
+
+    const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+
+    reposService.reset(options, (error: string) => {
+      expect(error).to.equal(stderr);
+
+      assert.calledOnce(execStub);
+      assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
+
+      assert.calledOnce(errorStub);
+      assert.alwaysCalledWithExactly(errorStub, {
+        obj: {
+          code,
+          command,
+          options: defaults(options, defaultOptions),
+          defaultOptions,
+          stdout,
+          stderr
+        }
+      });
+
+      return done();
+    });
+  }));
+
+  it('should reset succesfuly to master, when branch wasn\'t given', sandbox(function (done: Function): void {
+    const code = 0;
+    const stdout = '';
+    const stderr = '';
+    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
+    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
+    const absolutePathToRepos = pathToRepo;
+    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} reset --hard origin/master`;
+
+    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, async: false, silent: false };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -271,6 +523,67 @@ describe('Test Repos Service', () => {
     });
   }));
 
+  it('should make pull request successfully, when branch wasn\'t given', sandbox(function (done: Function): void {
+    const code = 0;
+    const stdout = '';
+    const stderr = '';
+    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
+    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
+    const absolutePathToRepos = pathToRepo;
+    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} pull origin master`;
+
+    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, async: false, silent: false };
+
+    const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+
+    reposService.pull(options, (error: string) => {
+      expect(error).to.not.exist;
+
+      assert.calledOnce(execStub);
+      assert.alwaysCalledWithExactly(execStub, command, { async: false, silent: false }, match.func);
+
+      assert.notCalled(errorStub);
+
+      return done();
+    });
+  }));
+
+  it('should respond with error when pull request process threw error', sandbox(function (done: Function): void {
+    const code = 128;
+    const stdout = '';
+    const stderr = 'Boo!';
+    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
+    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
+    const absolutePathToRepos = pathToRepo;
+    const branch = 'development';
+    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} pull origin ${branch}`;
+
+    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: true, silent: true };
+
+    const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+
+    reposService.pull(options, (error: string) => {
+      expect(error).to.equal(stderr);
+
+      assert.calledOnce(execStub);
+      assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
+
+      assert.calledOnce(errorStub);
+      assert.alwaysCalledWithExactly(errorStub, {
+        obj: {
+          code,
+          command,
+          options: defaults(options, defaultOptions),
+          defaultOptions,
+          stdout,
+          stderr
+        }
+      });
+
+      return done();
+    });
+  }));
+
   it('should remove untracked files from given directory', sandbox(function (done: Function): void {
     const code = 0;
     const stdout = '';
@@ -278,10 +591,9 @@ describe('Test Repos Service', () => {
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
     const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
     const absolutePathToRepos = pathToRepo;
-    const branch = '';
     const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} clean -f -d`;
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: false, silent: false };
+    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, async: false, silent: false };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -292,6 +604,42 @@ describe('Test Repos Service', () => {
       assert.alwaysCalledWithExactly(execStub, command, { async: false, silent: false }, match.func);
 
       assert.notCalled(errorStub);
+
+      return done();
+    });
+  }));
+
+  it('should respond with error when cleaning directory from untracked files threw error', sandbox(function (done: Function): void {
+    const code = 128;
+    const stdout = '';
+    const stderr = 'Boo!';
+    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
+    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
+    const absolutePathToRepos = pathToRepo;
+    const branch = 'development';
+    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} clean -f -d`;
+
+    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: true, silent: true };
+
+    const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+
+    reposService.clean(options, (error: string) => {
+      expect(error).to.equal(stderr);
+
+      assert.calledOnce(execStub);
+      assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
+
+      assert.calledOnce(errorStub);
+      assert.alwaysCalledWithExactly(errorStub, {
+        obj: {
+          code,
+          command,
+          options: defaults(options, defaultOptions),
+          defaultOptions,
+          stdout,
+          stderr
+        }
+      });
 
       return done();
     });
@@ -318,6 +666,42 @@ describe('Test Repos Service', () => {
       assert.alwaysCalledWithExactly(execStub, command, { async: false, silent: false }, match.func);
 
       assert.notCalled(errorStub);
+
+      return done();
+    });
+  }));
+
+  it('should respond with error when cleaning directory from untracked files threw error', sandbox(function (done: Function): void {
+    const code = 128;
+    const stdout = '';
+    const stderr = 'Boo!';
+    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
+    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
+    const absolutePathToRepos = pathToRepo;
+    const branch = 'development';
+    const command = `wc -l ${absolutePathToRepos}/*.csv | grep "total$"`;
+
+    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: true, silent: true };
+
+    const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+
+    reposService.getAmountLines(options, (error: string) => {
+      expect(error).to.equal(stderr);
+
+      assert.calledOnce(execStub);
+      assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
+
+      assert.calledOnce(errorStub);
+      assert.alwaysCalledWithExactly(errorStub, {
+        obj: {
+          code,
+          command,
+          options: defaults(options, defaultOptions),
+          defaultOptions,
+          stdout,
+          stderr
+        }
+      });
 
       return done();
     });
