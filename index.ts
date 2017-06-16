@@ -19,6 +19,8 @@ export interface Options extends Partial<DefaultOptions> {
   pathToRepo: string;
   relativeFilePath?: string;
   files?: string[];
+  commitFrom?: string;
+  commitTo?: string;
 }
 
 // keyof ExecOptions
@@ -124,6 +126,13 @@ class ReposService {
   public show(options: Options, callback: ErrorCallback<string>): ChildProcess {
     const {absolutePathToRepos, pathToRepo, commit, relativeFilePath} = defaults(options, defaultOptions);
     const command = this.wrapGitCommand(absolutePathToRepos, pathToRepo, `show ${commit}:${relativeFilePath}`);
+
+    return this.runShellJsCommand(command, options, callback);
+  }
+
+  public diff(options: Options, callback: ErrorCallback<string>): ChildProcess {
+    const {absolutePathToRepos, pathToRepo, commitFrom, commitTo} = defaults(options, defaultOptions);
+    const command = this.wrapGitCommand(absolutePathToRepos, pathToRepo, `diff ${commitFrom} ${commitTo} --name-status --no-renames | grep ".csv$"`);
 
     return this.runShellJsCommand(command, options, callback);
   }
