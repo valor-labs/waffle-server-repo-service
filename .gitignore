@@ -3,3 +3,4 @@ coverage
 specReports
 **/*.js
 **/*.js.map
+package-lock.json
