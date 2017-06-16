@@ -12,15 +12,18 @@
     "spec:rm": "rm -rf specReports",
     "spec:istanbul": "istanbul --include-all-sources cover _mocha -- -R spec --compilers ts:ts-node/register 'test/**/*.spec.ts'",
     "spec:remap": "remap-istanbul -i coverage/coverage.json -e node_modules,coverage -t html -o coverage/remap-istanbul",
-    "tsc": "tsc --project tsconfig.json"
+    "tsc": "tsc --project tsconfig.json",
+    "precommit": "npm run tsc && npm run test",
+    "prepush": "validate-commit-msg"
   },
-  "pre-commit": [
-    "tsc",
-    "test"
-  ],
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/Gapminder/waffle-server-repo-service.git"
+  },
+  "config": {
+    "validate-commit-msg": {
+      "types": "conventional-commit-types"
+    }
   },
   "keywords": [
     "git",
@@ -62,15 +65,16 @@
     "@types/sinon-test": "^1.0.2",
     "bunyan": "^1.8.10",
     "chai": "^4.0.2",
+    "husky": "^0.13.4",
     "istanbul": "^0.4.5",
     "mocha": "^3.4.2",
     "mochawesome": "^2.2.1",
-    "pre-commit": "^1.2.2",
     "remap-istanbul": "^0.9.5",
     "shelljs": "^0.7.8",
     "sinon": "^2.3.4",
     "sinon-test": "^1.0.2",
     "ts-node": "^3.0.6",
-    "tslint": "^5.4.3"
+    "tslint": "^5.4.3",
+    "validate-commit-msg": "^2.12.2"
   }
 }
