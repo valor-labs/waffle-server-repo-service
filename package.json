@@ -12,7 +12,7 @@
     "spec:rm": "rm -rf specReports",
     "spec:istanbul": "istanbul --include-all-sources cover _mocha -- -R spec --compilers ts:ts-node/register 'test/**/*.spec.ts'",
     "spec:remap": "remap-istanbul -i coverage/coverage.json -e node_modules,coverage -t html -o coverage/remap-istanbul",
-    "tsc": "tsc --project tsconfig.json",
+    "tsc": "node_modules/.bin/tsc --project tsconfig.json",
     "precommit": "npm run tsc && npm run test",
     "prepush": "validate-commit-msg"
   },

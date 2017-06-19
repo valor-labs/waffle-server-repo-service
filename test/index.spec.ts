@@ -9,7 +9,9 @@ import * as shell from 'shelljs';
 import * as sinon from 'sinon';
 import * as sinonTest from 'sinon-test';
 
-import reposService, { defaultOptions, Options } from '../index';
+import reposService, {defaultOptions, Options, CloneOptions, AmountLinesOptions, DirOptions} from '../index';
+import * as path from 'path';
+import {ExecOptions} from 'shelljs';
 
 const sandbox = sinonTest.configureTest(sinon);
 const assert = sinon.assert;
@@ -37,11 +39,11 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = '';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const command = `git -C ${pathToRepo} clone ${githubUrl} ${pathToRepo} -b master`;
+    const relativePathToRepo = 'repos/VS-work/ddf--ws-testing/master';
+    const absolutePathToRepos = path.resolve(process.cwd(), relativePathToRepo);
+    const command = `git -C ${absolutePathToRepos} clone ${githubUrl} ${relativePathToRepo} -b master`;
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo };
+    const options: CloneOptions = { absolutePathToRepos, githubUrl, relativePathToRepo };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -62,11 +64,11 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = 'fatal: destination path \'ddf--ws-testing\' already exists and is not an empty directory.';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const command = `git -C ${pathToRepo} clone ${githubUrl} ${pathToRepo} -b master`;
+    const relativePathToRepo = 'repos/VS-work/ddf--ws-testing/master';
+    const absolutePathToRepos = path.resolve(process.cwd(), relativePathToRepo);
+    const command = `git -C ${absolutePathToRepos} clone ${githubUrl} ${relativePathToRepo} -b master`;
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo };
+    const options: CloneOptions = { absolutePathToRepos, githubUrl, relativePathToRepo };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -76,8 +78,17 @@ describe('Test Repos Service', () => {
       assert.calledOnce(execStub);
       assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
 
-      assert.notCalled(errorStub);
-
+      assert.calledOnce(errorStub);
+      assert.alwaysCalledWithExactly(errorStub, {
+        obj: {
+          code,
+          command,
+          options: defaults(options, defaultOptions),
+          defaultOptions,
+          stdout,
+          stderr
+        }
+      });
       return done();
     });
   }));
@@ -87,11 +98,11 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = 'Boo!';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const command = `git -C ${pathToRepo} clone ${githubUrl} ${pathToRepo} -b master`;
+    const relativePathToRepo = 'repos/VS-work/ddf--ws-testing/master';
+    const absolutePathToRepos = path.resolve(process.cwd(), relativePathToRepo);
+    const command = `git -C ${absolutePathToRepos} clone ${githubUrl} ${relativePathToRepo} -b master`;
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo };
+    const options: CloneOptions = { absolutePathToRepos, githubUrl, relativePathToRepo };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -122,11 +133,10 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = '';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const command = `git -C ${pathToRepo} clone ${githubUrl} ${pathToRepo} -b master`;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
+    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} clone ${githubUrl} ${pathToRepo} -b master`;
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, async: false, silent: false };
+    const options: Options = { githubUrl, pathToRepo, async: false, silent: false };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -147,11 +157,10 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = 'Boo!';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const command = `git -C ${pathToRepo} clone ${githubUrl} ${pathToRepo} -b master`;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
+    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} clone ${githubUrl} ${pathToRepo} -b master`;
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo };
+    const options: Options = { githubUrl, pathToRepo };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -182,12 +191,11 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = '';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
     const branch = 'development';
-    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} checkout ${branch}`;
+    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} checkout ${branch}`;
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: false, silent: false };
+    const options: Options = { githubUrl, pathToRepo, branch, async: false, silent: false };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -208,11 +216,10 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = '';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} checkout master`;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
+    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} checkout master`;
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, async: false, silent: false };
+    const options: Options = { githubUrl, pathToRepo, async: false, silent: false };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -233,11 +240,10 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = 'Boo!';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} checkout master`;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
+    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} checkout master`;
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, async: true, silent: true };
+    const options: Options = { githubUrl, pathToRepo, async: true, silent: true };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -268,12 +274,11 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = '';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
     const commit = 'HEAD';
-    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} checkout ${commit}`;
+    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} checkout ${commit}`;
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, commit, async: false, silent: false };
+    const options: Options = { githubUrl, pathToRepo, commit, async: false, silent: false };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -294,11 +299,10 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = '';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} checkout HEAD`;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
+    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} checkout HEAD`;
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, async: false, silent: false };
+    const options: Options = { githubUrl, pathToRepo, async: false, silent: false };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -319,12 +323,11 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = 'Boo!';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
     const commit = 'HEAD';
-    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} checkout ${commit}`;
+    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} checkout ${commit}`;
 
-    const options: Options = { absolutePathToRepos, githubUrl, commit, pathToRepo, async: true, silent: true };
+    const options: Options = { githubUrl, commit, pathToRepo, async: true, silent: true };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -355,11 +358,10 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = '';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} fetch --all --prune`;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
+    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} fetch --all --prune`;
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, async: false, silent: false };
+    const options: Options = { githubUrl, pathToRepo, async: false, silent: false };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -380,11 +382,10 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = 'Boo!';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} fetch --all --prune`;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
+    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} fetch --all --prune`;
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, async: true, silent: true };
+    const options: Options = { githubUrl, pathToRepo, async: true, silent: true };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -415,12 +416,11 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = '';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
     const branch = 'development';
-    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} reset --hard origin/${branch}`;
+    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} reset --hard origin/${branch}`;
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: false, silent: false };
+    const options: Options = { githubUrl, pathToRepo, branch, async: false, silent: false };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -441,12 +441,11 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = 'Boo!';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
     const branch = 'development';
-    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} reset --hard origin/${branch}`;
+    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} reset --hard origin/${branch}`;
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: true, silent: true };
+    const options: Options = { githubUrl, pathToRepo, branch, async: true, silent: true };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -477,11 +476,11 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = '';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} reset --hard origin/master`;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, async: false, silent: false };
+    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} reset --hard origin/master`;
+
+    const options: Options = { githubUrl, pathToRepo, async: false, silent: false };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -502,12 +501,12 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = '';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const branch = 'development';
-    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} pull origin ${branch}`;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: false, silent: false };
+    const branch = 'development';
+    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} pull origin ${branch}`;
+
+    const options: Options = { githubUrl, pathToRepo, branch, async: false, silent: false };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -528,11 +527,11 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = '';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} pull origin master`;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, async: false, silent: false };
+    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} pull origin master`;
+
+    const options: Options = { githubUrl, pathToRepo, async: false, silent: false };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -553,12 +552,12 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = 'Boo!';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const branch = 'development';
-    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} pull origin ${branch}`;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: true, silent: true };
+    const branch = 'development';
+    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} pull origin ${branch}`;
+
+    const options: Options = { githubUrl, pathToRepo, branch, async: true, silent: true };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -589,11 +588,11 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = '';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} clean -f -d`;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, async: false, silent: false };
+    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} clean -f -d`;
+
+    const options: Options = { githubUrl, pathToRepo, async: false, silent: false };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -614,12 +613,12 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = 'Boo!';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const branch = 'development';
-    const command = `git --git-dir=${absolutePathToRepos}${pathToRepo}/.git --work-tree=${absolutePathToRepos}${pathToRepo} clean -f -d`;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: true, silent: true };
+    const branch = 'development';
+    const command = `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} clean -f -d`;
+
+    const options: Options = { githubUrl, pathToRepo, branch, async: true, silent: true };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -650,12 +649,12 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = '';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const branch = '';
-    const command = `wc -l ${absolutePathToRepos}/*.csv | grep "total$"`;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: false, silent: false };
+    const branch = '';
+    const command = `wc -l ${pathToRepo}/*.csv | grep "total$"`;
+
+    const options: Options = { githubUrl, pathToRepo, branch, async: false, silent: false };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -676,12 +675,12 @@ describe('Test Repos Service', () => {
     const stdout = '';
     const stderr = 'Boo!';
     const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const branch = 'development';
-    const command = `wc -l ${absolutePathToRepos}/*.csv | grep "total$"`;
+    const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: true, silent: true };
+    const branch = 'development';
+    const command = `wc -l ${pathToRepo}/*.csv | grep "total$"`;
+
+    const options: AmountLinesOptions = { pathToRepo, async: true, silent: true };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -711,13 +710,9 @@ describe('Test Repos Service', () => {
     const code = 0;
     const stdout = '';
     const stderr = '';
-    const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const absolutePathToRepos = pathToRepo;
-    const branch = '';
     const command = `ssh -T git@github.com`;
 
-    const options: Options = { absolutePathToRepos, githubUrl, pathToRepo, branch, async: false, silent: false };
+    const options: ExecOptions = { async: false, silent: false };
 
     const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
@@ -734,16 +729,17 @@ describe('Test Repos Service', () => {
   }));
 
   it('should make a dir for a repo', sandbox(function (done: Function): void {
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const option = `-p`;
+    const pathToDir = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
+    const commandOption = `-p`;
 
+    const options: DirOptions = {pathToDir};
     const execStub = this.stub(shell, 'mkdir');
 
-    reposService.makeDirForce(pathToRepo, (error: string) => {
+    reposService.makeDirForce(options, (error: string) => {
       expect(error).to.not.exist;
 
       assert.calledOnce(execStub);
-      assert.alwaysCalledWithExactly(execStub, option, pathToRepo);
+      assert.alwaysCalledWithExactly(execStub, commandOption, pathToDir);
 
       assert.notCalled(errorStub);
 
@@ -752,16 +748,17 @@ describe('Test Repos Service', () => {
   }));
 
   it('should remove directory', sandbox(function (done: Function): void {
-    const pathToRepo = '/repos/VS-work/ddf--ws-testing/master';
-    const option = `-rf`;
+    const pathToDir = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
+    const commandOption = `-rf`;
 
+    const options: DirOptions = {pathToDir};
     const execStub = this.stub(shell, 'rm');
 
-    reposService.removeDirForce(pathToRepo, (error: string) => {
+    reposService.removeDirForce(options, (error: string) => {
       expect(error).to.not.exist;
 
       assert.calledOnce(execStub);
-      assert.alwaysCalledWithExactly(execStub, option, `${pathToRepo}/*`);
+      assert.alwaysCalledWithExactly(execStub, commandOption, `${pathToDir}/*`);
 
       assert.notCalled(errorStub);
 
