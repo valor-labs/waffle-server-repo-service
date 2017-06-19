@@ -4,8 +4,8 @@
   "description": "Module for working with git repos on WS and CLI tool",
   "main": "index.js",
   "scripts": {
-    "install": "npm run tsc",
-    "build": "npm run tsc",
+    "install": "node_modules/.bin/tsc --project tsconfig.json",
+    "build": "node_modules/.bin/tsc --project tsconfig.json",
     "test": "npm run spec",
     "spec": "mocha --reporter mochawesome --reporter-options reportDir=specReports,reportFilename=specReport --compilers ts:ts-node/register 'test/**/*.spec.ts'",
     "spec:coverage": "npm run spec:rm && npm run spec:istanbul && npm run spec:remap",
