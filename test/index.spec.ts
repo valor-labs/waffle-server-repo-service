@@ -4,7 +4,6 @@
 import * as Logger from 'bunyan';
 import { expect } from 'chai';
 import { defaults } from 'lodash';
-import 'mocha';
 import * as shell from 'shelljs';
 import * as sinon from 'sinon';
 import * as sinonTest from 'sinon-test';

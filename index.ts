@@ -5,6 +5,9 @@ import { defaults, includes, pick, isEmpty, isArray } from 'lodash';
 import * as shell from 'shelljs';
 import { ExecOptions } from 'shelljs';
 
+interface ErrorCallback<T> { (err?: T): void; }
+interface AsyncResultCallback<T, E> { (err?: E, result?: T): void; }
+
 export interface DefaultOptions {
   silent: Boolean;
   async: Boolean;
