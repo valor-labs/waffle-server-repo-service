@@ -169,7 +169,7 @@ class ReposService {
   public getAmountLines(options: AmountLinesOptions, callback: RSAsyncResultCallback<any, string>): ChildProcess {
     const { pathToRepo, files } = defaults(options, defaultOptions);
 
-    let command = `wc -l ${pathToRepo}/*.csv | grep "total$"`;
+    let command = 'wc -l ' + pathToRepo + '/*.csv | grep "total$"';
 
     if (isArray(files)) {
       command = isEmpty(files) ? 'echo 0' : `wc -l "${files}" | grep "total$"`;
