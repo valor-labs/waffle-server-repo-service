@@ -131,28 +131,37 @@ class ReposService {
     return this.runShellJsCommand(command, options, callback);
   }
 
-  public log(options: Options, callback: ErrorCallback<string>): ChildProcess {
+  public log(options: Options, callback: AsyncResultCallback<any, string>): ChildProcess {
     const { pathToRepo } = defaults(options, defaultOptions);
     const command = this.wrapGitCommand(pathToRepo, `log --pretty=format:%h%n%ad%n%s%n%n`);
 
     return this.runShellJsCommand(command, options, callback);
   }
 
-  public show(options: ShowOptions, callback: ErrorCallback<string>): ChildProcess {
+  public show(options: ShowOptions, callback: AsyncResultCallback<any, string>): ChildProcess {
     const { pathToRepo, commit, relativeFilePath } = defaults(options, defaultOptions);
     const command = this.wrapGitCommand(pathToRepo, `show ${commit}:${relativeFilePath}`);
 
-    return this.runShellJsCommand(command, options, callback);
+    return this.runShellJsCommand(command, options, (error: string, result: string) => {
+      const isNotExistFile = includes(error, `fatal: Path '${relativeFilePath}' does not exist in '${commit}'`);
+      const isNotInCommit = includes(error,`exists on disk, but not in`);
+
+      if (isNotExistFile || isNotInCommit) {
+        return callback(null, '');
+      }
+
+      return callback(error, result);
+    });
   }
 
-  public diff(options: DiffOptions, callback: ErrorCallback<string>): ChildProcess {
+  public diff(options: DiffOptions, callback: AsyncResultCallback<any, string>): ChildProcess {
     const { pathToRepo, commitFrom, commitTo } = defaults(options, defaultOptions);
     const command = this.wrapGitCommand(pathToRepo, `diff ${commitFrom} ${commitTo} --name-status --no-renames | grep ".csv$"`);
 
     return this.runShellJsCommand(command, options, callback);
   }
 
-  public getAmountLines(options: AmountLinesOptions, callback: ErrorCallback<string>): ChildProcess {
+  public getAmountLines(options: AmountLinesOptions, callback: AsyncResultCallback<any, string>): ChildProcess {
     const { pathToRepo, files } = defaults(options, defaultOptions);
 
     let command = `wc -l ${pathToRepo}/*.csv | grep "total$"`;
