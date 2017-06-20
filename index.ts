@@ -133,7 +133,7 @@ class ReposService {
 
   public log(options: Options, callback: AsyncResultCallback<any, string>): ChildProcess {
     const { pathToRepo } = defaults(options, defaultOptions);
-    const command = this.wrapGitCommand(pathToRepo, `log --pretty=format:%h%n%ad%n%s%n%n`);
+    const command = this.wrapGitCommand(pathToRepo, `log --pretty=format:%h%n%at%n%ad%n%s%n%n`);
 
     return this.runShellJsCommand(command, options, callback);
   }
@@ -215,9 +215,11 @@ class ReposService {
     const {prettifyResult} = options;
     const execOptions: ExecOptions = this.getExecOptions(options);
 
+    this._logger.info({ obj: { source: 'repo-service', message: 'runShellJsCommand', command, options } });
+
     return shell.exec(command, execOptions, (code: number, stdout: string, stderr: string) => {
       if (code !== 0) {
-        this._logger.error({ obj: { code, command, options, stdout, stderr, defaultOptions } });
+        this._logger.error({ obj: { source: 'repo-service', code, command, options, stdout, stderr, defaultOptions } });
 
         return callback(stderr);
       }
@@ -227,7 +229,7 @@ class ReposService {
   }
 
   private wrapGitCommand(pathToRepo: string, command: string): string {
-    return `git --git-dir=${pathToRepo}/.git --work-tree=${pathToRepo} ${command}`;
+    return `git --git-dir=${pathToRepo}.git --work-tree=${pathToRepo} ${command}`;
   }
 
   private getExecOptions(options: Options | CloneOptions | AmountLinesOptions): ExecOptions {
