@@ -89,7 +89,7 @@
     "adjacent-overload-signatures": true,
     "arrow-parens": true,
     "file-header": false,
-    "max-file-line-count": [true, 400],
+    "max-file-line-count": [true, 1100],
     "no-for-in-array": false,
     "no-unsafe-finally": true,
     "object-literal-key-quotes": [true, "as-needed"],
