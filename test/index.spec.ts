@@ -4,13 +4,13 @@
 import * as Logger from 'bunyan';
 import { expect } from 'chai';
 import { defaults } from 'lodash';
+import * as path from 'path';
 import * as shell from 'shelljs';
+import { ExecOptions } from 'shelljs';
 import * as sinon from 'sinon';
 import * as sinonTest from 'sinon-test';
 
-import reposService, {defaultOptions, Options, CloneOptions, AmountLinesOptions, DirOptions} from '../index';
-import * as path from 'path';
-import {ExecOptions} from 'shelljs';
+import reposService, { AmountLinesOptions, CloneOptions, defaultOptions, DirOptions, Options } from '../index';
 
 const sandbox = sinonTest.configureTest(sinon);
 const assert = sinon.assert;
@@ -57,7 +57,14 @@ describe('Test Repos Service', () => {
       assert.notCalled(errorStub);
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -96,7 +103,14 @@ describe('Test Repos Service', () => {
       });
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -135,7 +149,14 @@ describe('Test Repos Service', () => {
       });
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -162,7 +183,14 @@ describe('Test Repos Service', () => {
       assert.notCalled(errorStub);
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -200,7 +228,14 @@ describe('Test Repos Service', () => {
       });
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -228,7 +263,14 @@ describe('Test Repos Service', () => {
       assert.notCalled(errorStub);
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -255,7 +297,14 @@ describe('Test Repos Service', () => {
       assert.notCalled(errorStub);
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -293,7 +342,14 @@ describe('Test Repos Service', () => {
       });
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -321,7 +377,14 @@ describe('Test Repos Service', () => {
       assert.notCalled(errorStub);
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -348,7 +411,14 @@ describe('Test Repos Service', () => {
       assert.notCalled(errorStub);
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -387,7 +457,14 @@ describe('Test Repos Service', () => {
       });
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -414,7 +491,14 @@ describe('Test Repos Service', () => {
       assert.notCalled(errorStub);
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -452,7 +536,14 @@ describe('Test Repos Service', () => {
       });
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -480,7 +571,14 @@ describe('Test Repos Service', () => {
       assert.notCalled(errorStub);
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -519,7 +617,14 @@ describe('Test Repos Service', () => {
       });
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -547,7 +652,14 @@ describe('Test Repos Service', () => {
       assert.notCalled(errorStub);
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -576,7 +688,14 @@ describe('Test Repos Service', () => {
       assert.notCalled(errorStub);
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -604,7 +723,14 @@ describe('Test Repos Service', () => {
       assert.notCalled(errorStub);
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -644,7 +770,14 @@ describe('Test Repos Service', () => {
       });
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -672,7 +805,14 @@ describe('Test Repos Service', () => {
       assert.notCalled(errorStub);
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -712,7 +852,14 @@ describe('Test Repos Service', () => {
       });
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -741,7 +888,14 @@ describe('Test Repos Service', () => {
       assert.notCalled(errorStub);
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -779,7 +933,14 @@ describe('Test Repos Service', () => {
       });
 
       assert.calledOnce(infoStub);
-      assert.alwaysCalledWithExactly(infoStub, {obj : { source: 'repo-service', message: 'runShellJsCommand', command, options }});
+      assert.alwaysCalledWithExactly(infoStub, {
+        obj: {
+          source: 'repo-service',
+          message: 'runShellJsCommand',
+          command,
+          options
+        }
+      });
 
       return done();
     });
@@ -812,7 +973,7 @@ describe('Test Repos Service', () => {
     const pathToDir = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
     const commandOption = `-p`;
 
-    const options: DirOptions = {pathToDir};
+    const options: DirOptions = { pathToDir };
     const execStub = this.stub(shell, 'mkdir');
 
     reposService.makeDirForce(options, (error: string) => {
@@ -832,7 +993,7 @@ describe('Test Repos Service', () => {
     const pathToDir = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
     const commandOption = `-rf`;
 
-    const options: DirOptions = {pathToDir};
+    const options: DirOptions = { pathToDir };
     const execStub = this.stub(shell, 'rm');
 
     reposService.removeDirForce(options, (error: string) => {
