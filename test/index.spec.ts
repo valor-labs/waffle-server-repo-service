@@ -11,7 +11,8 @@ import * as shell from 'shelljs';
 import { ExecOptions } from 'shelljs';
 import * as sinon from 'sinon';
 import * as sinonTest from 'sinon-test';
-import reposService, {
+import {
+  reposService,
   AmountLinesOptions,
   CloneOptions,
   defaultOptions,
