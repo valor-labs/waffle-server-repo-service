@@ -1354,7 +1354,7 @@ describe('Repos Service', () => {
     }));
   });
 
-  describe('#getAmountLines', () => {
+  describe('#getLinesAmount', () => {
     it('should return amount lines in files in given path', sandbox(function (done: Function): void {
       const code = 0;
       const stdout = '123';
@@ -1376,7 +1376,7 @@ describe('Repos Service', () => {
         silent: false
       };
 
-      reposService.getAmountLines(options, (error: string, result: number) => {
+      reposService.getLinesAmount(options, (error: string, result: number) => {
         expect(error).to.not.exist;
         expect(result).to.equal(123);
 
@@ -1413,7 +1413,7 @@ describe('Repos Service', () => {
 
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
-      reposService.getAmountLines(options, (error: string, result: number) => {
+      reposService.getLinesAmount(options, (error: string, result: number) => {
         expect(error).to.not.exist;
         expect(result).to.equal(123);
 
@@ -1442,7 +1442,7 @@ describe('Repos Service', () => {
       const prettifyStub = this.stub(defaultOptions, 'prettifyResult');
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
-      reposService.getAmountLines(options, (error: string) => {
+      reposService.getLinesAmount(options, (error: string) => {
         expect(error).to.not.exist;
 
         assert.calledOnce(execStub);
@@ -1470,7 +1470,7 @@ describe('Repos Service', () => {
       const prettifyStub = this.stub(defaultOptions, 'prettifyResult');
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
-      reposService.getAmountLines(options, (error: string) => {
+      reposService.getLinesAmount(options, (error: string) => {
         expect(error).to.not.exist;
 
         assert.calledOnce(execStub);
@@ -1507,7 +1507,7 @@ describe('Repos Service', () => {
 
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
-      reposService.getAmountLines(options, (error: string) => {
+      reposService.getLinesAmount(options, (error: string) => {
         expect(error).to.equal(stderr);
 
         assert.calledOnce(execStub);
