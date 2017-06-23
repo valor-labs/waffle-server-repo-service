@@ -245,4 +245,6 @@ class ReposService {
 const defaultLogger = Logger.createLogger({ name: 'defaultLogger' });
 const reposService = new ReposService(defaultLogger);
 
-export default reposService;
+export {
+  reposService
+};
