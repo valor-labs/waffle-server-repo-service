@@ -166,7 +166,7 @@ class ReposService {
     return this.runShellJsCommand(command, options, callback);
   }
 
-  public getAmountLines(options: AmountLinesOptions, callback: RSAsyncResultCallback<any, string>): ChildProcess {
+  public getLinesAmount(options: AmountLinesOptions, callback: RSAsyncResultCallback<any, string>): ChildProcess {
     const { pathToRepo, files } = defaults(options, defaultOptions);
 
     let command = 'wc -l ' + pathToRepo + '/*.csv | grep "total$"';
