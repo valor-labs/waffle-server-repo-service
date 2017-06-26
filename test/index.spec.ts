@@ -13,7 +13,7 @@ import * as sinon from 'sinon';
 import * as sinonTest from 'sinon-test';
 import {
   reposService,
-  AmountLinesOptions,
+  LinesAmountOptions,
   CloneOptions,
   defaultOptions,
   DiffOptions,
@@ -1438,7 +1438,7 @@ describe('Repos Service', () => {
       const files = [];
       const command = `echo 0`;
 
-      const options: AmountLinesOptions = { files, pathToRepo, async: false, silent: false };
+      const options: LinesAmountOptions = { files, pathToRepo, async: false, silent: false };
 
       const prettifyStub = this.stub(defaultOptions, 'prettifyResult');
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
@@ -1466,7 +1466,7 @@ describe('Repos Service', () => {
       const files = ['test-one.cvs', 'test-two.cvs'];
       const command = `wc -l "${files}" | grep "total$"`;
 
-      const options: AmountLinesOptions = { files, pathToRepo, async: false, silent: false };
+      const options: LinesAmountOptions = { files, pathToRepo, async: false, silent: false };
 
       const prettifyStub = this.stub(defaultOptions, 'prettifyResult');
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
@@ -1504,7 +1504,7 @@ describe('Repos Service', () => {
 
       const command = `wc -l ${pathToRepo}/*.csv | grep "total$"`;
 
-      const options: AmountLinesOptions = { pathToRepo, async: true, silent: true };
+      const options: LinesAmountOptions = { pathToRepo, async: true, silent: true };
 
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
