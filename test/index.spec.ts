@@ -1356,7 +1356,7 @@ describe('Repos Service', () => {
   });
 
   describe('#getLinesAmount', () => {
-    it('should return amount lines in files in given path', sandbox(function (done: Function): void {
+    it('should return lines amount in files in given path', sandbox(function (done: Function): void {
       const code = 0;
       const stdout = '123';
       const stderr = '';
@@ -1393,7 +1393,7 @@ describe('Repos Service', () => {
       });
     }));
 
-    it('should transfer into get-amount-lines a custom function to proccess result instead of default one', sandbox(function (done: Function): void {
+    it('should transfer into get-lines-amount a custom function to proccess result instead of default one', sandbox(function (done: Function): void {
       const code = 0;
       const stdout = `123 \n test`;
       const stderr = '';
@@ -1458,7 +1458,7 @@ describe('Repos Service', () => {
       });
     }));
 
-    it('should return amount lines in given files, if it\'s not an empty array', sandbox(function (done: Function): void {
+    it('should return lines amount in given files, if it\'s not an empty array', sandbox(function (done: Function): void {
       const code = 0;
       const stdout = '';
       const stderr = '';
