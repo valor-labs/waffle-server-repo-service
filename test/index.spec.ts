@@ -11,8 +11,9 @@ import * as shell from 'shelljs';
 import { ExecOptions } from 'shelljs';
 import * as sinon from 'sinon';
 import * as sinonTest from 'sinon-test';
-import reposService, {
-  AmountLinesOptions,
+import {
+  reposService,
+  LinesAmountOptions,
   CloneOptions,
   defaultOptions,
   DiffOptions,
@@ -1354,8 +1355,8 @@ describe('Repos Service', () => {
     }));
   });
 
-  describe('#getAmountLines', () => {
-    it('should return amount lines in files in given path', sandbox(function (done: Function): void {
+  describe('#getLinesAmount', () => {
+    it('should return lines amount in files in given path', sandbox(function (done: Function): void {
       const code = 0;
       const stdout = '123';
       const stderr = '';
@@ -1376,7 +1377,7 @@ describe('Repos Service', () => {
         silent: false
       };
 
-      reposService.getAmountLines(options, (error: string, result: number) => {
+      reposService.getLinesAmount(options, (error: string, result: number) => {
         expect(error).to.not.exist;
         expect(result).to.equal(123);
 
@@ -1392,7 +1393,7 @@ describe('Repos Service', () => {
       });
     }));
 
-    it('should transfer into get-amount-lines a custom function to proccess result instead of default one', sandbox(function (done: Function): void {
+    it('should transfer into get-lines-amount a custom function to proccess result instead of default one', sandbox(function (done: Function): void {
       const code = 0;
       const stdout = `123 \n test`;
       const stderr = '';
@@ -1413,7 +1414,7 @@ describe('Repos Service', () => {
 
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
-      reposService.getAmountLines(options, (error: string, result: number) => {
+      reposService.getLinesAmount(options, (error: string, result: number) => {
         expect(error).to.not.exist;
         expect(result).to.equal(123);
 
@@ -1437,12 +1438,12 @@ describe('Repos Service', () => {
       const files = [];
       const command = `echo 0`;
 
-      const options: AmountLinesOptions = { files, pathToRepo, async: false, silent: false };
+      const options: LinesAmountOptions = { files, pathToRepo, async: false, silent: false };
 
       const prettifyStub = this.stub(defaultOptions, 'prettifyResult');
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
-      reposService.getAmountLines(options, (error: string) => {
+      reposService.getLinesAmount(options, (error: string) => {
         expect(error).to.not.exist;
 
         assert.calledOnce(execStub);
@@ -1457,7 +1458,7 @@ describe('Repos Service', () => {
       });
     }));
 
-    it('should return amount lines in given files, if it\'s not an empty array', sandbox(function (done: Function): void {
+    it('should return lines amount in given files, if it\'s not an empty array', sandbox(function (done: Function): void {
       const code = 0;
       const stdout = '';
       const stderr = '';
@@ -1465,12 +1466,12 @@ describe('Repos Service', () => {
       const files = ['test-one.cvs', 'test-two.cvs'];
       const command = `wc -l "${files}" | grep "total$"`;
 
-      const options: AmountLinesOptions = { files, pathToRepo, async: false, silent: false };
+      const options: LinesAmountOptions = { files, pathToRepo, async: false, silent: false };
 
       const prettifyStub = this.stub(defaultOptions, 'prettifyResult');
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
-      reposService.getAmountLines(options, (error: string) => {
+      reposService.getLinesAmount(options, (error: string) => {
         expect(error).to.not.exist;
 
         assert.calledOnce(execStub);
@@ -1503,11 +1504,11 @@ describe('Repos Service', () => {
 
       const command = `wc -l ${pathToRepo}/*.csv | grep "total$"`;
 
-      const options: AmountLinesOptions = { pathToRepo, async: true, silent: true };
+      const options: LinesAmountOptions = { pathToRepo, async: true, silent: true };
 
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
-      reposService.getAmountLines(options, (error: string) => {
+      reposService.getLinesAmount(options, (error: string) => {
         expect(error).to.equal(stderr);
 
         assert.calledOnce(execStub);

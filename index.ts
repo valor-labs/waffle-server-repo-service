@@ -41,7 +41,7 @@ export interface DiffOptions extends Options {
   commitTo: string;
 }
 
-export interface AmountLinesOptions extends Partial<DefaultOptions> {
+export interface LinesAmountOptions extends Partial<DefaultOptions> {
   pathToRepo?: string;
   files?: string[];
 }
@@ -166,7 +166,7 @@ class ReposService {
     return this.runShellJsCommand(command, options, callback);
   }
 
-  public getAmountLines(options: AmountLinesOptions, callback: RSAsyncResultCallback<any, string>): ChildProcess {
+  public getLinesAmount(options: LinesAmountOptions, callback: RSAsyncResultCallback<any, string>): ChildProcess {
     const { pathToRepo, files } = defaults(options, defaultOptions);
 
     let command = 'wc -l ' + pathToRepo + '/*.csv | grep "total$"';
@@ -216,7 +216,7 @@ class ReposService {
     });
   }
 
-  private runShellJsCommand(command: string, options: Options | CloneOptions | AmountLinesOptions, callback: RSAsyncResultCallback<any, string>): ChildProcess {
+  private runShellJsCommand(command: string, options: Options | CloneOptions | LinesAmountOptions, callback: RSAsyncResultCallback<any, string>): ChildProcess {
     const { prettifyResult } = options;
     const execOptions: ExecOptions = this.getExecOptions(options);
 
@@ -237,7 +237,7 @@ class ReposService {
     return `git --git-dir=${pathToRepo}.git --work-tree=${pathToRepo} ${command}`;
   }
 
-  private getExecOptions(options: Options | CloneOptions | AmountLinesOptions): ExecOptions {
+  private getExecOptions(options: Options | CloneOptions | LinesAmountOptions): ExecOptions {
     return pick(options, defaultShellOptions);
   }
 }
@@ -245,4 +245,6 @@ class ReposService {
 const defaultLogger = Logger.createLogger({ name: 'defaultLogger' });
 const reposService = new ReposService(defaultLogger);
 
-export default reposService;
+export {
+  reposService
+};
