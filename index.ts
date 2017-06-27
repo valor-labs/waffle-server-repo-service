@@ -206,10 +206,14 @@ class ReposService {
 
   public removeDirForce(options: DirOptions, onDirRemoved: RSErrorCallback<string>): void {
     return fs.exists(options.pathToDir, (exists: boolean) => {
-      if (!exists) {
+      if (exists) {
         shell.rm('-rf', options.pathToDir + '/*');
 
         return onDirRemoved(shell.error());
+      }
+
+      if (options.silent) {
+        return onDirRemoved();
       }
 
       return onDirRemoved(`Directory '${options.pathToDir}' is not exist!`);
