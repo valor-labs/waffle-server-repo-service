@@ -131,7 +131,7 @@ class ReposService {
 
   public clean(options: Options, callback: RSErrorCallback<string>): ChildProcess {
     const { pathToRepo } = defaults(options, defaultOptions);
-    const command = this.wrapGitCommand(pathToRepo, `clean -f -d`);
+    const command = this.wrapGitCommand(pathToRepo, `clean -f -x`);
 
     return this.runShellJsCommand(command, options, callback);
   }

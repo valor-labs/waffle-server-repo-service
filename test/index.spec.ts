@@ -859,7 +859,7 @@ describe('Repos Service', () => {
       const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
       const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master') + '/';
 
-      const command = `git --git-dir=${pathToRepo}.git --work-tree=${pathToRepo} clean -f -d`;
+      const command = `git --git-dir=${pathToRepo}.git --work-tree=${pathToRepo} clean -f -x`;
 
       const options: Options = { githubUrl, pathToRepo, async: false, silent: false };
 
@@ -899,7 +899,7 @@ describe('Repos Service', () => {
       const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master') + '/';
 
       const branch = 'development';
-      const command = `git --git-dir=${pathToRepo}.git --work-tree=${pathToRepo} clean -f -d`;
+      const command = `git --git-dir=${pathToRepo}.git --work-tree=${pathToRepo} clean -f -x`;
 
       const options: Options = { githubUrl, pathToRepo, branch, async: true, silent: true };
 
