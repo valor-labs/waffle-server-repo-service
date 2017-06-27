@@ -1650,7 +1650,7 @@ describe('Repos Service', () => {
 
       const shellErrStub = this.stub(shell, 'error');
       const rmStub = this.stub(shell, 'rm');
-      const existsStub = this.stub(fs, 'exists').callsArgWithAsync(1, false);
+      const existsStub = this.stub(fs, 'exists').callsArgWithAsync(1, true);
 
       reposService.removeDirForce(options, (error: string) => {
         expect(error).to.not.exist;
@@ -1669,13 +1669,65 @@ describe('Repos Service', () => {
       });
     }));
 
+    it('should remove directory', sandbox(function (done: Function): void {
+      const expectectedError = 'Boo!';
+      const pathToDir = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
+      const commandOption = `-rf`;
+
+      const options: DirOptions = { pathToDir };
+
+      const shellErrStub = this.stub(shell, 'error').returns(expectectedError);
+      const rmStub = this.stub(shell, 'rm');
+      const existsStub = this.stub(fs, 'exists').callsArgWithAsync(1, true);
+
+      reposService.removeDirForce(options, (error: string) => {
+        expect(error).to.equal(expectectedError);
+
+        assert.calledOnce(existsStub);
+        assert.alwaysCalledWithExactly(existsStub, pathToDir, match.func);
+
+        assert.calledOnce(rmStub);
+        assert.alwaysCalledWithExactly(rmStub, commandOption, `${pathToDir}/*`);
+
+        assert.calledOnce(shellErrStub);
+
+        assert.notCalled(errorStub);
+
+        return done();
+      });
+    }));
+
+    it('should try to remove absent directory when silent option was given', sandbox(function (done: Function): void {
+      const pathToDir = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
+      const commandOption = `-rf`;
+
+      const options: DirOptions = { pathToDir, silent: true };
+
+      const shellErrorStub = this.stub(shell, 'error');
+      const rmStub = this.stub(shell, 'rm');
+      const existsStub = this.stub(fs, 'exists').callsArgWithAsync(1, false);
+
+      reposService.removeDirForce(options, (error: string) => {
+        expect(error).to.not.exist;
+
+        assert.calledOnce(existsStub);
+        assert.alwaysCalledWithExactly(existsStub, pathToDir, match.func);
+
+        assert.notCalled(rmStub);
+        assert.notCalled(shellErrorStub);
+        assert.notCalled(errorStub);
+
+        return done();
+      });
+    }));
+
     it('should response with error, if path exists', sandbox(function (done: Function): void {
       const pathToDir = process.cwd();
       const options: DirOptions = { pathToDir };
       const expectedError = `Directory '${options.pathToDir}' is not exist!`;
 
       const rmStub = this.stub(shell, 'rm');
-      const existsStub = this.stub(fs, 'exists').callsArgWithAsync(1, pathToDir);
+      const existsStub = this.stub(fs, 'exists').callsArgWithAsync(1, false);
       const shellErrStub = this.stub(shell, 'error');
 
       reposService.removeDirForce(options, (error: string) => {
