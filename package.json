@@ -1,6 +1,6 @@
 {
   "name": "waffle-server-repo-service",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Module for working with git repos on WS and CLI tool",
   "main": "index.js",
   "scripts": {
