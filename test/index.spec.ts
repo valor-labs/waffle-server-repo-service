@@ -1363,7 +1363,7 @@ describe('Repos Service', () => {
       const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
       const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master') + '/';
       const branch = '';
-      const command = `wc -l ${pathToRepo}/*.csv | grep "total$"`;
+      const command = `wc -l ${pathToRepo}*.csv | grep "total$"`;
 
       const prettifyResultStub = this.stub().callsFake((result: string) => parseInt(result, 10));
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
@@ -1431,27 +1431,20 @@ describe('Repos Service', () => {
     }));
 
     it('should return "echo 0", if given files is empty array', sandbox(function (done: Function): void {
-      const code = 0;
-      const stdout = '0';
-      const stderr = '';
-      const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
+      const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master') + '/';
       const files = [];
-      const command = `echo 0`;
 
       const options: LinesAmountOptions = { files, pathToRepo, async: false, silent: false };
 
+      const execStub = this.stub(shell, 'exec');
       const prettifyStub = this.stub(defaultOptions, 'prettifyResult');
-      const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
-      reposService.getLinesAmount(options, (error: string) => {
+      reposService.getLinesAmount(options, (error: string, result: number) => {
         expect(error).to.not.exist;
+        expect(result).to.equal(0);
 
-        assert.calledOnce(execStub);
-        assert.alwaysCalledWithExactly(execStub, command, { async: false, silent: false }, match.func);
-
-        assert.calledOnce(prettifyStub);
-        assert.alwaysCalledWithExactly(prettifyStub, stdout);
-
+        assert.notCalled(execStub);
+        assert.notCalled(prettifyStub);
         assert.notCalled(errorStub);
 
         return done();
@@ -1460,34 +1453,99 @@ describe('Repos Service', () => {
 
     it('should return lines amount in given files, if it\'s not an empty array', sandbox(function (done: Function): void {
       const code = 0;
-      const stdout = '';
+      const stdout = '123';
       const stderr = '';
       const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
       const files = ['test-one.cvs', 'test-two.cvs'];
-      const command = `wc -l "${files}" | grep "total$"`;
+      const commands: any[] = [
+        `wc -l ${files[0]} | grep "total$"`,
+        `wc -l ${files[1]} | grep "total$"`
+      ];
 
       const options: LinesAmountOptions = { files, pathToRepo, async: false, silent: false };
 
-      const prettifyStub = this.stub(defaultOptions, 'prettifyResult');
+      const prettifyStub = this.spy(defaultOptions, 'prettifyResult');
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
-      reposService.getLinesAmount(options, (error: string) => {
+      reposService.getLinesAmount(options, (error: string, result: number) => {
         expect(error).to.not.exist;
+        expect(result).to.equal('0123123');
 
-        assert.calledOnce(execStub);
-        assert.alwaysCalledWithExactly(execStub, command, { async: false, silent: false }, match.func);
+        assert.calledTwice(execStub);
+        assert.calledWithExactly(execStub, commands[0], { async: false, silent: false }, match.func);
+        assert.calledWithExactly(execStub, commands[1], { async: false, silent: false }, match.func);
 
-        assert.calledOnce(prettifyStub);
+        assert.calledTwice(prettifyStub);
         assert.alwaysCalledWithExactly(prettifyStub, stdout);
 
         assert.notCalled(errorStub);
 
-        assert.calledOnce(infoStub);
-        assert.alwaysCalledWithExactly(infoStub, {
+        assert.calledTwice(infoStub);
+        assert.calledWithExactly(infoStub, {
           obj: {
             source: 'repo-service',
             message: 'runShellJsCommand',
-            command,
+            command: commands[0],
+            options
+          }
+        });
+        assert.calledWithExactly(infoStub, {
+          obj: {
+            source: 'repo-service',
+            message: 'runShellJsCommand',
+            command: commands[1],
+            options
+          }
+        });
+
+        return done();
+      });
+    }));
+
+    it('should return lines amount in given files, if it\'s not an empty array and prettified function was given', sandbox(function (done: Function): void {
+      const code = 0;
+      const stdout = '123';
+      const stderr = '';
+      const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
+      const files = ['test-one.cvs', 'test-two.cvs'];
+      const commands: any[] = [
+        `wc -l ${files[0]} | grep "total$"`,
+        `wc -l ${files[1]} | grep "total$"`
+      ];
+      const prettifyResultStub = this.stub().callsFake((value: string) => parseInt(value, 10));
+      const options: LinesAmountOptions = { files, pathToRepo, prettifyResult: prettifyResultStub, async: false, silent: false };
+
+      const defaultPrettifyResultStub = this.spy(defaultOptions, 'prettifyResult');
+      const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+
+      reposService.getLinesAmount(options, (error: string, result: number) => {
+        expect(error).to.not.exist;
+        expect(result).to.equal(246);
+
+        assert.calledTwice(execStub);
+        assert.calledWithExactly(execStub, commands[0], { async: false, silent: false }, match.func);
+        assert.calledWithExactly(execStub, commands[1], { async: false, silent: false }, match.func);
+
+        assert.notCalled(defaultPrettifyResultStub);
+        assert.calledTwice(prettifyResultStub);
+        assert.alwaysCalledWithExactly(prettifyResultStub, stdout);
+
+        assert.notCalled(errorStub);
+
+        assert.calledTwice(infoStub);
+        assert.calledWithExactly(infoStub, {
+          obj: {
+            source: 'repo-service',
+            message: 'runShellJsCommand',
+            command: commands[0],
+            options
+          }
+        });
+        assert.calledWithExactly(infoStub, {
+          obj: {
+            source: 'repo-service',
+            message: 'runShellJsCommand',
+            command: commands[1],
             options
           }
         });
@@ -1502,7 +1560,7 @@ describe('Repos Service', () => {
       const stderr = 'Boo!';
       const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master') + '/';
 
-      const command = `wc -l ${pathToRepo}/*.csv | grep "total$"`;
+      const command = `wc -l ${pathToRepo}*.csv | grep "total$"`;
 
       const options: LinesAmountOptions = { pathToRepo, async: true, silent: true };
 

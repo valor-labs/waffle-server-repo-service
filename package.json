@@ -47,10 +47,12 @@
   },
   "homepage": "https://github.com/VS-work/waffle-server-repo-service#readme",
   "dependencies": {
+    "@types/async": "^2.0.40",
     "@types/bunyan": "1.8.0",
     "@types/core-js": "0.9.41",
     "@types/lodash": "4.14.66",
     "@types/shelljs": "0.7.2",
+    "async": "^2.5.0",
     "lodash": "4.17.4",
     "path": "0.12.7",
     "shelljs": "0.7.8",

@@ -1,9 +1,11 @@
 import * as Logger from 'bunyan';
 import { ChildProcess } from 'child_process';
 import * as fs from 'fs';
-import { defaults, includes, isArray, isEmpty, pick } from 'lodash';
+import { defaults, includes, pick } from 'lodash';
+import * as path from 'path';
 import * as shell from 'shelljs';
 import { ExecOptions } from 'shelljs';
+import * as async from 'async';
 
 export interface RSErrorCallback<T> {
   (err?: T): void;
@@ -166,16 +168,11 @@ class ReposService {
     return this.runShellJsCommand(command, options, callback);
   }
 
-  public getLinesAmount(options: LinesAmountOptions, callback: RSAsyncResultCallback<any, string>): ChildProcess {
+  public getLinesAmount(options: LinesAmountOptions, done: RSAsyncResultCallback<any, string>): void {
     const { pathToRepo, files } = defaults(options, defaultOptions);
+    const pathToRepoFiles = path.resolve(pathToRepo, '*.csv');
 
-    let command = 'wc -l ' + pathToRepo + '/*.csv | grep "total$"';
-
-    if (isArray(files)) {
-      command = isEmpty(files) ? 'echo 0' : `wc -l "${files}" | grep "total$"`;
-    }
-
-    return this.runShellJsCommand(command, options, callback);
+    return async.reduce(files || [pathToRepoFiles], 0, async.apply(this.getLinesAmountForFile.bind(this), options), done);
   }
 
   public checkSshKey(execOptions: ExecOptions, callback: RSErrorCallback<string>): ChildProcess {
@@ -217,6 +214,14 @@ class ReposService {
       }
 
       return onDirRemoved(`Directory '${options.pathToDir}' is not exist!`);
+    });
+  }
+
+  private getLinesAmountForFile(options: LinesAmountOptions, linesAmount: number, filepath: string, callback: RSAsyncResultCallback<number, string>): void {
+    const command = 'wc -l ' + filepath + ' | grep "total$"';
+
+    this.runShellJsCommand(command, options, (error: string, result: number): void => {
+      return callback(error, linesAmount + result);
     });
   }
 
