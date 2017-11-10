@@ -176,6 +176,63 @@ describe('Repos Service', () => {
         return done();
       });
     }));
+
+    it('should respond with trimmed error when clonning process threw error', sandbox(function (done: Function): void {
+      const code = 128;
+      const stdout = '';
+      const stderr = `Cloning into '/home/waffle-server/dwd/ddf/Gapminder/ddf--pcbs--census/features/flattened'...
+        ERROR: Repository not found.
+            fatal: Could not read from remote repository.
+
+            Please make sure you have the correct access rights
+        and the repository exists.`;
+      const expectedStdErr = `Cloning into '.../dwd/ddf/Gapminder/ddf--pcbs--census/features/flattened'...
+        ERROR: Repository not found.
+            fatal: Could not read from remote repository.
+
+            Please make sure you have the correct access rights
+        and the repository exists.`;
+      const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
+      const relativePathToRepo = 'repos/VS-work/ddf--ws-testing/master';
+      const absolutePathToRepos = path.resolve(process.cwd(), relativePathToRepo);
+      const command = `git -C ${absolutePathToRepos} clone ${githubUrl} ${relativePathToRepo} -b master`;
+
+      const options: CloneOptions = {absolutePathToRepos, githubUrl, relativePathToRepo};
+
+      const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+
+      reposService.silentClone(options, (error: string) => {
+        expect(error).to.equal(expectedStdErr);
+
+        assert.calledOnce(execStub);
+        assert.alwaysCalledWithExactly(execStub, command, {async: true, silent: true}, match.func);
+
+        assert.calledOnce(errorStub);
+        assert.alwaysCalledWithExactly(errorStub, {
+          obj: {
+            source: 'repo-service',
+            code,
+            command,
+            options: defaults(options, defaultOptions),
+            defaultOptions,
+            stdout,
+            stderr
+          }
+        });
+
+        assert.calledOnce(infoStub);
+        assert.alwaysCalledWithExactly(infoStub, {
+          obj: {
+            source: 'repo-service',
+            message: 'runShellJsCommand',
+            command,
+            options
+          }
+        });
+
+        return done();
+      });
+    }));
   });
 
   describe('#clone', () => {
