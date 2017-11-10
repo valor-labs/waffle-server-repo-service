@@ -78,12 +78,15 @@ class ReposService {
 
     return this.runShellJsCommand(command, options, (error: string) => {
       const isNotEmptyDirectory = includes(error, 'already exists and is not an empty directory');
+      const trimmedError = error ?
+        error.replace(/\/home\/waffle-server(\/ws.import\/repos)?/gi, '...') :
+        error;
 
       if (isNotEmptyDirectory) {
         return callback();
       }
 
-      return callback(error);
+      return callback(trimmedError);
     });
   }
 
