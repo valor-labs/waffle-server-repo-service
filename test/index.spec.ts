@@ -139,16 +139,69 @@ describe('Repos Service', () => {
       const relativePathToRepo = 'repos/VS-work/ddf--ws-testing/master';
       const absolutePathToRepos = path.resolve(process.cwd(), relativePathToRepo);
       const command = `git -C ${absolutePathToRepos} clone ${githubUrl} ${relativePathToRepo} -b master`;
+      const expectedError = 'Unexpected error [code=128]: silentClone';
 
       const options: CloneOptions = { absolutePathToRepos, githubUrl, relativePathToRepo };
 
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
       reposService.silentClone(options, (error: string) => {
-        expect(error).to.equal(stderr);
+        expect(error).to.equal(expectedError);
 
         assert.calledOnce(execStub);
         assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
+
+        assert.calledOnce(errorStub);
+        assert.alwaysCalledWithExactly(errorStub, {
+          obj: {
+            source: 'repo-service',
+            code,
+            command,
+            options: defaults(options, defaultOptions),
+            defaultOptions,
+            stdout,
+            stderr
+          }
+        });
+
+        assert.calledOnce(infoStub);
+        assert.alwaysCalledWithExactly(infoStub, {
+          obj: {
+            source: 'repo-service',
+            message: 'runShellJsCommand',
+            command,
+            options
+          }
+        });
+
+        return done();
+      });
+    }));
+
+    it('should respond with trimmed error when clonning process threw error', sandbox(function (done: Function): void {
+      const code = 128;
+      const stdout = '';
+      const stderr = `Cloning into '/home/waffle-server/dwd/ddf/Gapminder/ddf--pcbs--census/features/flattened'...
+        ERROR: Repository not found.
+            fatal: Could not read from remote repository.
+
+            Please make sure you have the correct access rights
+        and the repository exists.`;
+      const expectedError = 'Unexpected error [code=128]: silentClone';
+      const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
+      const relativePathToRepo = 'repos/VS-work/ddf--ws-testing/master';
+      const absolutePathToRepos = path.resolve(process.cwd(), relativePathToRepo);
+      const command = `git -C ${absolutePathToRepos} clone ${githubUrl} ${relativePathToRepo} -b master`;
+
+      const options: CloneOptions = {absolutePathToRepos, githubUrl, relativePathToRepo};
+
+      const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
+
+      reposService.silentClone(options, (error: string) => {
+        expect(error).to.equal(expectedError);
+
+        assert.calledOnce(execStub);
+        assert.alwaysCalledWithExactly(execStub, command, {async: true, silent: true}, match.func);
 
         assert.calledOnce(errorStub);
         assert.alwaysCalledWithExactly(errorStub, {
@@ -224,13 +277,14 @@ describe('Repos Service', () => {
       const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
       const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master') + '/';
       const command = `git --git-dir=${pathToRepo}.git --work-tree=${pathToRepo} clone ${githubUrl} ${pathToRepo} -b master`;
+      const expectedError = 'Unexpected error [code=128]: clone';
 
       const options: Options = { githubUrl, pathToRepo };
 
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
       reposService.clone(options, (error: string) => {
-        expect(error).to.equal(stderr);
+        expect(error).to.equal(expectedError);
 
         assert.calledOnce(execStub);
         assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
@@ -303,7 +357,7 @@ describe('Repos Service', () => {
       });
     }));
 
-    it('should checkout to master whithout errors, if branch wasn\'t given', sandbox(function (done: Function): void {
+    it('should checkout to master without errors, if branch wasn\'t given', sandbox(function (done: Function): void {
       const code = 0;
       const stdout = '';
       const stderr = '';
@@ -348,13 +402,14 @@ describe('Repos Service', () => {
       const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
       const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master') + '/';
       const command = `git --git-dir=${pathToRepo}.git --work-tree=${pathToRepo} checkout master`;
+      const expectedError = 'Unexpected error [code=128]: checkoutToBranch';
 
       const options: Options = { githubUrl, pathToRepo, async: true, silent: true };
 
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
       reposService.checkoutToBranch(options, (error: string) => {
-        expect(error).to.equal(stderr);
+        expect(error).to.equal(expectedError);
 
         assert.calledOnce(execStub);
         assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
@@ -473,13 +528,14 @@ describe('Repos Service', () => {
       const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master') + '/';
       const commit = 'HEAD';
       const command = `git --git-dir=${pathToRepo}.git --work-tree=${pathToRepo} checkout ${commit}`;
+      const expectedError = 'Unexpected error [code=128]: checkoutToCommit';
 
       const options: Options = { githubUrl, commit, pathToRepo, async: true, silent: true };
 
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
       reposService.checkoutToCommit(options, (error: string) => {
-        expect(error).to.equal(stderr);
+        expect(error).to.equal(expectedError);
 
         assert.calledOnce(execStub);
         assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
@@ -558,13 +614,14 @@ describe('Repos Service', () => {
       const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
       const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master') + '/';
       const command = `git --git-dir=${pathToRepo}.git --work-tree=${pathToRepo} fetch --all --prune`;
+      const expectedError = 'Unexpected error [code=128]: fetch';
 
       const options: Options = { githubUrl, pathToRepo, async: true, silent: true };
 
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
       reposService.fetch(options, (error: string) => {
-        expect(error).to.equal(stderr);
+        expect(error).to.equal(expectedError);
 
         assert.calledOnce(execStub);
         assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
@@ -645,13 +702,14 @@ describe('Repos Service', () => {
       const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master') + '/';
       const branch = 'development';
       const command = `git --git-dir=${pathToRepo}.git --work-tree=${pathToRepo} reset --hard origin/${branch}`;
+      const expectedError = 'Unexpected error [code=128]: reset';
 
       const options: Options = { githubUrl, pathToRepo, branch, async: true, silent: true };
 
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
       reposService.reset(options, (error: string) => {
-        expect(error).to.equal(stderr);
+        expect(error).to.equal(expectedError);
 
         assert.calledOnce(execStub);
         assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
@@ -812,13 +870,14 @@ describe('Repos Service', () => {
 
       const branch = 'development';
       const command = `git --git-dir=${pathToRepo}.git --work-tree=${pathToRepo} pull origin ${branch}`;
+      const expectedError = 'Unexpected error [code=128]: pull';
 
       const options: Options = { githubUrl, pathToRepo, branch, async: true, silent: true };
 
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
       reposService.pull(options, (error: string) => {
-        expect(error).to.equal(stderr);
+        expect(error).to.equal(expectedError);
 
         assert.calledOnce(execStub);
         assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
@@ -900,13 +959,14 @@ describe('Repos Service', () => {
 
       const branch = 'development';
       const command = `git --git-dir=${pathToRepo}.git --work-tree=${pathToRepo} clean -f -x`;
+      const expectedError = 'Unexpected error [code=128]: clean';
 
       const options: Options = { githubUrl, pathToRepo, branch, async: true, silent: true };
 
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
       reposService.clean(options, (error: string) => {
-        expect(error).to.equal(stderr);
+        expect(error).to.equal(expectedError);
 
         assert.calledOnce(execStub);
         assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
@@ -1009,6 +1069,7 @@ describe('Repos Service', () => {
       const githubUrl = 'git@github.com:VS-work/ddf--ws-testing.git';
       const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master');
       const command = `git --git-dir=${pathToRepo}.git --work-tree=${pathToRepo} log --pretty=format:%h%n%at%n%ad%n%s%n%n`;
+      const expectedError = 'Unexpected error [code=128]: log';
       const prettifyResultStub = this.stub(defaultOptions, 'prettifyResult')
         .returns([{ hash: '1231231', date: Date.now(), fullDate: new Date(), message: 'text' }]);
 
@@ -1017,7 +1078,7 @@ describe('Repos Service', () => {
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
       reposService.log(options, (error: string) => {
-        expect(error).to.equal(stderr);
+        expect(error).to.equal(expectedError);
 
         assert.calledOnce(execStub);
         assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
@@ -1200,13 +1261,14 @@ describe('Repos Service', () => {
       const relativeFilePath = 'lang/nl-nl';
       const commit = 'HEAD';
       const command = `git --git-dir=${pathToRepo}.git --work-tree=${pathToRepo} show ${commit}:${relativeFilePath}`;
+      const expectedError = 'Unexpected error [code=128]: show';
 
       const options: ShowOptions = { commit, relativeFilePath, githubUrl, pathToRepo, async: true, silent: true };
 
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
       reposService.show(options, (error: string) => {
-        expect(error).to.equal(stderr);
+        expect(error).to.equal(expectedError);
 
         assert.calledOnce(execStub);
         assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
@@ -1324,6 +1386,7 @@ describe('Repos Service', () => {
       const commitTo = 'HEAD^';
       const commitFrom = 'HEAD~3';
       const command = `git --git-dir=${pathToRepo}.git --work-tree=${pathToRepo} diff ${commitFrom} ${commitTo} --name-status --no-renames | grep ".csv$"`;
+      const expectedError = 'Unexpected error [code=128]: diff';
 
       const options: DiffOptions = { commitFrom, commitTo, githubUrl, pathToRepo, async: true, silent: true };
 
@@ -1331,7 +1394,7 @@ describe('Repos Service', () => {
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
       reposService.diff(options, (error: string) => {
-        expect(error).to.equal(stderr);
+        expect(error).to.equal(expectedError);
 
         assert.calledOnce(execStub);
         assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
@@ -1561,13 +1624,14 @@ describe('Repos Service', () => {
       const pathToRepo = path.resolve(process.cwd(), '/repos/VS-work/ddf--ws-testing/master') + '/';
 
       const command = `wc -l ${pathToRepo}*.csv | grep "total$"`;
+      const expectedError = 'Unexpected error [code=128]: getLinesAmount';
 
       const options: LinesAmountOptions = { pathToRepo, async: true, silent: true };
 
       const execStub = this.stub(shell, 'exec').callsArgWithAsync(2, code, stdout, stderr);
 
       reposService.getLinesAmount(options, (error: string) => {
-        expect(error).to.equal(stderr);
+        expect(error).to.equal(expectedError);
 
         assert.calledOnce(execStub);
         assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
@@ -1615,7 +1679,7 @@ describe('Repos Service', () => {
         expect(error).to.not.exist;
 
         assert.calledOnce(execStub);
-        assert.alwaysCalledWithExactly(execStub, command, { async: false, silent: false }, match.func);
+        assert.alwaysCalledWithExactly(execStub, command, { async: false, silent: false, process: 'checkSshKey' }, match.func);
 
         assert.notCalled(errorStub);
         assert.notCalled(infoStub);
@@ -1639,7 +1703,7 @@ describe('Repos Service', () => {
         expect(error).to.equal(expectedError);
 
         assert.calledOnce(execStub);
-        assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true }, match.func);
+        assert.alwaysCalledWithExactly(execStub, command, { async: true, silent: true, process: 'checkSshKey' }, match.func);
 
         return done();
       });
