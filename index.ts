@@ -95,7 +95,7 @@ class ReposService {
         return callback();
       }
 
-      return callback(trimmedError);
+      return callback(error);
     });
   }
 
